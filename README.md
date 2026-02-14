@@ -25,7 +25,7 @@
 |-----|--------|
 | [ROADMAP.md](ROADMAP.md) | Versioner, released, build checklist, planerat |
 | [PLAYSTORE_LISTING.md](PLAYSTORE_LISTING.md) | Texter att kopiera till Play Store & App Store |
-| [legal/app-golfexcuse/](legal/app-golfexcuse/) | Privacy & Terms (kopia till app-legal-docs) |
+| [app-legal-docs-app-golfexcuse/](app-legal-docs-app-golfexcuse/) | Privacy & Terms (kopiera till [app-legal-docs](https://github.com/dotsystemsdevs/app-legal-docs) under mappen `app-golfexcuse`) |
 
 ---
 

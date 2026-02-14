@@ -16,10 +16,10 @@ import * as Clipboard from 'expo-clipboard';
 import { StatusBar } from 'expo-status-bar';
 import * as Updates from 'expo-updates';
 import * as StoreReview from 'expo-store-review';
+import * as Haptics from 'expo-haptics';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import {
   CONFIG,
-  QUICK_OPTIONS,
   PLACEHOLDER,
   LOADING_MESSAGES,
   SPACING,
@@ -31,9 +31,11 @@ import {
 import { pickRandom } from './src/utils';
 import { EXCUSES } from './src/excuses';
 
+// Din logga: byt till require('./assets/min-logga.png') för egen bild (samma fil används på splash + huvudvy)
+const LOGO = require('./assets/logo.png');
+
 export default function App() {
   const [excuse, setExcuse] = useState(null);
-  const [quickOption, setQuickOption] = useState(null);
   const [copied, setCopied] = useState(false);
   const [isGenerating, setIsGenerating] = useState(false);
   const [loadingMsg, setLoadingMsg] = useState(() => LOADING_MESSAGES?.[0] ?? 'Loading…');
@@ -107,7 +109,8 @@ export default function App() {
 
   const handleGenerate = useCallback(() => {
     if (isGenerating) return;
-    setLoadingMsg(pickRandom(LOADING_MESSAGES) || LOADING_MESSAGES?.[0] ?? 'Loading…');
+    try { Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium); } catch (_) {}
+    setLoadingMsg((pickRandom(LOADING_MESSAGES) || LOADING_MESSAGES?.[0]) ?? 'Loading…');
     setIsGenerating(true);
     loadingOpacity.setValue(1);
     const newExcuse = pickRandom(EXCUSES);
@@ -118,6 +121,7 @@ export default function App() {
       setExcuse(newExcuse || null);
       setIsGenerating(false);
       setGenerateCount((c) => c + 1);
+      try { Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success); } catch (_) {}
     }, delayMs);
   }, [isGenerating, loadingOpacity]);
 
@@ -144,8 +148,8 @@ export default function App() {
   const displayText = useMemo(() => {
     if (isGenerating) return null;
     if (!excuse) return null;
-    return quickOption ? `${quickOption}. ${excuse}` : excuse;
-  }, [excuse, quickOption, isGenerating]);
+    return excuse;
+  }, [excuse, isGenerating]);
 
   const handleCopy = useCallback(async () => {
     if (!displayText) return;
@@ -163,19 +167,13 @@ export default function App() {
     }
   }, [displayText]);
 
-  const handleChipPress = useCallback((opt) => {
-    const next = quickOption === opt ? null : opt;
-    setQuickOption(next);
-    if (next !== quickOption) setExcuse(null);
-  }, [quickOption]);
-
   const handleRequestReview = useCallback(async () => {
     setShowReviewPrompt(false);
     setHasAskedReview(true);
     try {
       const key = CONFIG.STORAGE_KEY_ASKED_REVIEW;
       if (key && typeof key === 'string') await AsyncStorage.setItem(key, 'true');
-      if (await StoreReview.isAvailableAsync()) await StoreReview.requestReview();
+      if (await StoreReview.hasAction()) await StoreReview.requestReview();
     } catch (_) {}
   }, []);
 
@@ -200,12 +198,14 @@ export default function App() {
     }
   }, []);
 
+  // Öppnar officiell Privacy Policy (app-legal-docs)
   const openPrivacy = useCallback(() => {
     const url = CONFIG.LEGAL_BASE_URL?.trim();
     if (!url) return;
     Linking.openURL(`${url}/privacy.html`).catch(() => {});
   }, []);
 
+  // Öppnar officiella Terms of Service (app-legal-docs)
   const openTerms = useCallback(() => {
     const url = CONFIG.LEGAL_BASE_URL?.trim();
     if (!url) return;
@@ -219,7 +219,7 @@ export default function App() {
         <View style={styles.splashRoot} accessibilityLabel="Loading Golf Excuse Generator">
           <View style={styles.splashContent}>
             <View style={styles.splashLogoWrap}>
-              <Image source={require('./assets/logo.png')} style={styles.splashLogo} resizeMode="cover" accessibilityLabel="Golf Excuse Generator logo" />
+              <Image source={LOGO} style={styles.splashLogo} resizeMode="cover" accessibilityLabel="Golf Excuse Generator logo" />
             </View>
             <Text style={styles.splashTitle}>
               <Text style={styles.splashTitlePart}>Golf </Text>
@@ -255,7 +255,7 @@ export default function App() {
         <View style={styles.container}>
           <View style={styles.header}>
             <View style={styles.logoWrap}>
-              <Image source={require('./assets/logo.png')} style={styles.logo} resizeMode="cover" accessibilityLabel="Golf Excuse Generator logo" />
+              <Image source={LOGO} style={styles.logo} resizeMode="cover" accessibilityLabel="Golf Excuse Generator logo" />
             </View>
             <Text style={styles.title}>
               <Text style={styles.titlePart}>Golf </Text>
@@ -299,7 +299,7 @@ export default function App() {
                     accessibilityLabel={copied ? 'Copied to clipboard' : 'Copy excuse to clipboard'}
                     accessibilityRole="button"
                   >
-                    <Ionicons name={copied ? 'checkmark' : 'copy-outline'} size={26} color={PALETTE.text} />
+                    <Ionicons name={copied ? 'checkmark' : 'copy-outline'} size={20} color={PALETTE.text} />
                   </Pressable>
                 </View>
               )}
@@ -323,27 +323,6 @@ export default function App() {
           </ScrollView>
 
           <View style={styles.bottomBlock}>
-            <Text style={styles.inputLabel}>Let the weather decide (optional)</Text>
-            <View style={styles.chipRow}>
-              {(QUICK_OPTIONS ?? []).map((opt) => (
-                <Pressable
-                  key={opt}
-                  style={({ pressed }) => [
-                    styles.chip,
-                    quickOption === opt && styles.chipActive,
-                    pressed && styles.pressed,
-                  ]}
-                  onPress={() => handleChipPress(opt)}
-hitSlop={{ top: SPACING.md, bottom: SPACING.md, left: SPACING.md, right: SPACING.md }}
-                    accessibilityLabel={`Weather: ${opt}. ${quickOption === opt ? 'Selected. Tap to deselect.' : 'Tap to select.'}`}
-                  accessibilityRole="button"
-                >
-                  <Text style={[styles.chipText, quickOption === opt && styles.chipTextActive]}>
-                    {opt}
-                  </Text>
-                </Pressable>
-              ))}
-            </View>
             <Pressable
               style={({ pressed }) => [
                 styles.generateBtn,
@@ -473,7 +452,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: SPACING.xxl,
   },
   header: {
-    marginTop: SPACING.sm,
+    marginTop: SPACING.xxl,
     marginBottom: SPACING.xl,
     alignItems: 'center',
   },
@@ -486,6 +465,7 @@ const styles = StyleSheet.create({
     borderColor: PALETTE.border,
     alignItems: 'center',
     justifyContent: 'center',
+    marginTop: SPACING.lg,
     marginBottom: SPACING.lg,
     overflow: 'hidden',
   },
@@ -613,12 +593,12 @@ const styles = StyleSheet.create({
     elevation: 6,
   },
   cardWithCopy: {
-    paddingTop: LAYOUT.cardTopWithCopy,
+    paddingBottom: 48,
   },
   cardCopyRow: {
     position: 'absolute',
-    top: SPACING.md,
-    right: SPACING.lg,
+    bottom: SPACING.sm,
+    right: SPACING.sm,
     flexDirection: 'row',
     alignItems: 'center',
     gap: SPACING.sm,
@@ -630,8 +610,8 @@ const styles = StyleSheet.create({
     maxWidth: 80,
   },
   cardCopyBtn: {
-    width: LAYOUT.touchTarget,
-    height: LAYOUT.touchTarget,
+    width: 36,
+    height: 36,
     borderRadius: RADIUS.full,
     backgroundColor: PALETTE.surface,
     borderWidth: 2,
@@ -648,13 +628,14 @@ const styles = StyleSheet.create({
   cardTextWrap: {
     flex: 1,
     justifyContent: 'center',
+    alignItems: 'center',
     minHeight: LAYOUT.btnMinHeight,
-    paddingRight: LAYOUT.cardTextRight,
   },
   cardText: {
     fontSize: FONT.bodyLg,
     lineHeight: 30,
     color: '#FFFFFF',
+    textAlign: 'center',
     textShadowColor: 'rgba(0,0,0,0.35)',
     textShadowOffset: { width: 0, height: 1 },
     textShadowRadius: 3,

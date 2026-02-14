@@ -14,7 +14,8 @@
     },
     "ios": {
       "supportsTablet": true,
-      "bundleIdentifier": "com.dotsystems.appgolfexcuse"
+      "bundleIdentifier": "com.dotsystems.appgolfexcuse",
+      "appStoreUrl": "https://apps.apple.com/app/id123456789"
     },
     "android": {
       "adaptiveIcon": {
@@ -23,7 +24,8 @@
       },
       "edgeToEdgeEnabled": true,
       "package": "com.dotsystems.appgolfexcuse",
-      "versionCode": 1
+      "versionCode": 1,
+      "playStoreUrl": "https://play.google.com/store/apps/details?id=com.dotsystems.appgolfexcuse"
     },
     "web": {
       "favicon": "./assets/favicon.png"
