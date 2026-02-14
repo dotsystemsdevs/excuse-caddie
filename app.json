@@ -15,7 +15,9 @@
     "ios": {
       "supportsTablet": true,
       "bundleIdentifier": "com.dotsystems.appgolfexcuse",
-      "appStoreUrl": "https://apps.apple.com/app/id123456789"
+      "config": {
+        "usesNonExemptEncryption": false
+      }
     },
     "android": {
       "adaptiveIcon": {

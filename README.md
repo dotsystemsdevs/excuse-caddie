@@ -1,6 +1,6 @@
 # app-golfexcuse
 
-**Golf Excuse Generator** — mobilapp som ger slumpmässiga golfursäkter i en knapptryckning. Välj valfritt väder (Windy, Rain, Cold, Hot), tryck **Generate Excuse**, kopiera och dela. Ingen konto, ingen spårning. React Native (Expo).
+**Golf Excuse Generator** — mobilapp som ger slumpmässiga golfursäkter i en knapptryckning. Tryck **Generate Excuse**, kopiera och dela. Ingen konto, ingen spårning. React Native (Expo).
 
 **Version:** 1.0.0 · **Repo:** [dotsystemsdevs/app-golfexcuse](https://github.com/dotsystemsdevs/app-golfexcuse)
 
@@ -24,6 +24,7 @@
 | Fil | Syfte |
 |-----|--------|
 | [ROADMAP.md](ROADMAP.md) | Versioner, released, build checklist, planerat |
+| [IOS_APP_STORE_CHECKLIST.md](IOS_APP_STORE_CHECKLIST.md) | iOS App Store — full kontroll före submission |
 | [PLAYSTORE_LISTING.md](PLAYSTORE_LISTING.md) | Texter att kopiera till Play Store & App Store |
 | [app-legal-docs-app-golfexcuse/](app-legal-docs-app-golfexcuse/) | Privacy & Terms (kopiera till [app-legal-docs](https://github.com/dotsystemsdevs/app-legal-docs) under mappen `app-golfexcuse`) |
 
@@ -32,7 +33,6 @@
 ## Vad appen gör
 
 - **Slumpmässig ursäkt** — ett tryck, 150+ alternativ
-- **Väder (valfritt)** — Windy, Rain, Cold, Hot som prefix
 - **Kopiera** — en tryckning, feedback "Copied!"
 - **Betyg** — uppmaning efter 3 genereringar; länkar till Privacy & Terms i sidfoten
 - **Uppdateringar** — in-app kontroll (Expo Updates)
@@ -98,8 +98,7 @@ app-golfexcuse/
 └── legal/
     └── app-golfexcuse/   # Privacy & Terms (publicera via app-legal-docs)
         ├── privacy.md
-        ├── terms.md
-        └── README.md
+        └── terms.md
 ```
 
 ---

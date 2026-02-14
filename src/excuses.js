@@ -1,7 +1,6 @@
 export const EXCUSES = [
   "It was leg day today.",
   "Barometric pressure must be dropping today.",
-  "My wife gave me a list of honey do's before I could get out to play.",
   "Back is tight, can't swing my normal swing.",
   "I need some new clubs.",
   "I had some negative thoughts before I hit that.",
@@ -103,7 +102,6 @@ export const EXCUSES = [
   "Something made a noise while I was swinging, a car, a bird, a guy in a cart on the other hole.",
   "A sudden, unexpected gust of wind, did you feel that? Where did that come from?",
   "I knew I shouldn't have hit that driver. I hate that club.",
-  "My wife thinks I'm out here having fun.",
   "Who had to plant a tree right there?",
   "I hit it short, the yardage on this hole must be wrong.",
   "I hit it long, the yardage on this hole must be wrong.",

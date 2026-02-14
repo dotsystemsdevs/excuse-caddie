@@ -1,6 +1,5 @@
 const {
   CONFIG,
-  QUICK_OPTIONS,
   PLACEHOLDER,
   LOADING_MESSAGES,
   SPACING,
@@ -38,24 +37,6 @@ describe('CONFIG', () => {
     expect(CONFIG.GENERATE_DELAY_MS).toBeGreaterThan(0);
     expect(CONFIG.COPY_RESET_MS).toBeGreaterThan(0);
     expect(CONFIG.SPLASH_MIN_MS).toBeGreaterThan(0);
-  });
-});
-
-describe('QUICK_OPTIONS', () => {
-  it('is non-empty array of strings', () => {
-    expect(Array.isArray(QUICK_OPTIONS)).toBe(true);
-    expect(QUICK_OPTIONS.length).toBeGreaterThan(0);
-    QUICK_OPTIONS.forEach((opt) => {
-      expect(typeof opt).toBe('string');
-      expect(opt.length).toBeGreaterThan(0);
-    });
-  });
-
-  it('contains Windy, Rain, Cold, Hot', () => {
-    expect(QUICK_OPTIONS).toContain('Windy');
-    expect(QUICK_OPTIONS).toContain('Rain');
-    expect(QUICK_OPTIONS).toContain('Cold');
-    expect(QUICK_OPTIONS).toContain('Hot');
   });
 });
 
