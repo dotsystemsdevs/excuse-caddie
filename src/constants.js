@@ -16,7 +16,7 @@ export const CONFIG = {
   SPLASH_MIN_MS: 1000,                   // Minsta tid inledande laddningsskärm (ms)
 };
 
-export const QUICK_OPTIONS = [];
+export const QUICK_OPTIONS = ['Windy', 'Rain', 'Cold', 'Hot'];
 
 export const PLACEHOLDER = 'Tap the yellow button below to get your first excuse.';
 
