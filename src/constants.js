@@ -1,19 +1,15 @@
 /**
  * App configuration and design tokens.
- * Single source of truth: URLs, storage keys, timing, layout.
- * Do not duplicate these values in App.js or elsewhere.
- *
- * Rättsligt: LEGAL_BASE_URL ska peka på publicerade Privacy & Terms (app-legal-docs).
- * STORAGE_KEY_ASKED_REVIEW används endast lokalt (AsyncStorage); ingen data skickas.
+ * Single source of truth for URLs, storage keys, timing, layout.
  */
 
 export const CONFIG = {
-  REVIEW_PROMPT_AFTER_GENERATES: 3,       // Visa betygsprompt efter N genereringar
-  STORAGE_KEY_ASKED_REVIEW: 'app_golfexcuse_asked_review', // Endast lokalt; ingen transmission
-  LEGAL_BASE_URL: 'https://dotsystemsdevs.github.io/app-legal-docs/app-golfexcuse', // Privacy & Terms (app-legal-docs)
-  GENERATE_DELAY_MS: 1100,                // Fördröjning innan ursäkt visas (ms)
-  COPY_RESET_MS: 1800,                   // Hur länge "Copied!" visas (ms)
-  SPLASH_MIN_MS: 1000,                   // Minsta tid inledande laddningsskärm (ms)
+  REVIEW_PROMPT_AFTER_GENERATES: 3,
+  STORAGE_KEY_ASKED_REVIEW: 'app_golfexcuse_asked_review',
+  LEGAL_BASE_URL: 'https://dotsystemsdevs.github.io/app-legal-docs/app-golfexcuse',
+  GENERATE_DELAY_MS: 1100,
+  COPY_RESET_MS: 1800,
+  SPLASH_MIN_MS: 1000,
 };
 
 export const PLACEHOLDER = 'Tap the yellow button below to get your first excuse.';

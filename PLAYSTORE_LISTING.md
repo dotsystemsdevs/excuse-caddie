@@ -79,6 +79,8 @@ Ej tillämpligt — appen har ingen notifikationsfunktion. All funktion sker nä
 | App name | Main store listing → App name | App Information → Name |
 | Short description | Main store listing → Short description (80 tecken) | — (finns inte) |
 | Long description | Main store listing → Full description | App Information → Description |
+| Promotional Text | — | App Store → Promotional Text (170 tecken) |
+| Keywords | — | App Store → Keywords (100 tecken) |
 
 ---
 

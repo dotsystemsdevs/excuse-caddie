@@ -31,7 +31,6 @@ import {
 import { pickRandom } from './src/utils';
 import { EXCUSES } from './src/excuses';
 
-// Din logga: byt till require('./assets/min-logga.png') för egen bild (samma fil används på splash + huvudvy)
 const LOGO = require('./assets/logo.png');
 
 export default function App() {
@@ -51,14 +50,12 @@ export default function App() {
   const generateTimeoutRef = useRef(null);
   const copyTimeoutRef = useRef(null);
 
-  // Inledande laddningsskärm: visa minst SPLASH_MIN_MS, sedan visa huvudvyn
   useEffect(() => {
     const minMs = typeof CONFIG.SPLASH_MIN_MS === 'number' ? CONFIG.SPLASH_MIN_MS : 1000;
     const t = setTimeout(() => setIsAppReady(true), minMs);
     return () => clearTimeout(t);
   }, []);
 
-  // Pulsanimation på laddningsskärmens indikator (stoppas när isAppReady)
   useEffect(() => {
     if (isAppReady) return;
     const pulse = Animated.loop(
@@ -71,7 +68,6 @@ export default function App() {
     return () => pulse.stop();
   }, [isAppReady, splashOpacity]);
 
-  // Läs om vi redan frågat om betyg (AsyncStorage)
   useEffect(() => {
     (async () => {
       try {
@@ -83,7 +79,6 @@ export default function App() {
     })();
   }, []);
 
-  // Kontrollera om det finns en ny version (Expo Updates; hoppa över i __DEV__)
   useEffect(() => {
     if (typeof __DEV__ !== 'undefined' && __DEV__) return;
     (async () => {
@@ -94,7 +89,6 @@ export default function App() {
     })();
   }, []);
 
-  // Städa timeouts vid unmount
   useEffect(() => {
     return () => {
       if (generateTimeoutRef.current) clearTimeout(generateTimeoutRef.current);
@@ -102,7 +96,6 @@ export default function App() {
     };
   }, []);
 
-  // Respektera systeminställning för reduce motion (mindre animationer)
   useEffect(() => {
     AccessibilityInfo.isReduceMotionEnabled?.().then(setReduceMotion).catch(() => {});
   }, []);
@@ -125,7 +118,6 @@ export default function App() {
     }, delayMs);
   }, [isGenerating, loadingOpacity]);
 
-  // Visa betygsprompt efter N genereringar (om vi inte redan frågat)
   useEffect(() => {
     const threshold = typeof CONFIG.REVIEW_PROMPT_AFTER_GENERATES === 'number' ? CONFIG.REVIEW_PROMPT_AFTER_GENERATES : 3;
     if (generateCount >= threshold && !hasAskedReview) {
@@ -162,9 +154,7 @@ export default function App() {
         copyTimeoutRef.current = null;
         setCopied(false);
       }, resetMs);
-    } catch (_) {
-      // Clipboard may be unavailable (e.g. permission)
-    }
+    } catch (_) {}
   }, [displayText]);
 
   const handleRequestReview = useCallback(async () => {
@@ -191,21 +181,17 @@ export default function App() {
     try {
       await Updates.fetchUpdateAsync();
       await Updates.reloadAsync();
-    } catch (_) {
-      // fetch or reload failed; user stays on current version
-    } finally {
+    } catch (_) {} finally {
       setUpdateDownloading(false);
     }
   }, []);
 
-  // Öppnar officiell Privacy Policy (app-legal-docs)
   const openPrivacy = useCallback(() => {
     const url = CONFIG.LEGAL_BASE_URL?.trim();
     if (!url) return;
     Linking.openURL(`${url}/privacy.html`).catch(() => {});
   }, []);
 
-  // Öppnar officiella Terms of Service (app-legal-docs)
   const openTerms = useCallback(() => {
     const url = CONFIG.LEGAL_BASE_URL?.trim();
     if (!url) return;
@@ -376,7 +362,6 @@ export default function App() {
   );
 }
 
-// Design: tokens + PALETTE. Slate/teal bakgrund, coral CTA, bra kontrast.
 const styles = StyleSheet.create({
   splashRoot: {
     flex: 1,
@@ -500,46 +485,6 @@ const styles = StyleSheet.create({
   },
   pressed: {
     opacity: 0.88,
-  },
-  inputLabel: {
-    fontSize: FONT.label,
-    lineHeight: 22,
-    color: PALETTE.text,
-    marginBottom: SPACING.md,
-    textAlign: 'center',
-  },
-  chipRow: {
-    flexDirection: 'row',
-    flexWrap: 'nowrap',
-    justifyContent: 'space-between',
-    gap: SPACING.sm,
-    marginBottom: SPACING.xl,
-  },
-  chip: {
-    flex: 1,
-    paddingVertical: SPACING.md,
-    paddingHorizontal: SPACING.sm,
-    borderRadius: RADIUS.xxl,
-    backgroundColor: PALETTE.surface,
-    borderWidth: 2,
-    borderColor: PALETTE.border,
-    minHeight: LAYOUT.touchTarget,
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-  chipActive: {
-    backgroundColor: PALETTE.surface,
-    borderWidth: 3,
-    borderColor: PALETTE.accent,
-  },
-  chipText: {
-    fontSize: FONT.label,
-    fontWeight: '600',
-    color: PALETTE.text,
-  },
-  chipTextActive: {
-    color: PALETTE.text,
-    fontWeight: '700',
   },
   bottomBlock: {
     paddingTop: SPACING.xxl,
