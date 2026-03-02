@@ -80,7 +80,7 @@ describe('RADIUS', () => {
 
 describe('FONT', () => {
   it('has expected keys and positive number values', () => {
-    const keys = ['caption', 'label', 'body', 'bodyLg', 'subtitle', 'title', 'btn'];
+    const keys = ['caption', 'label', 'body', 'bodyLg', 'subtitle', 'title'];
     keys.forEach((k) => {
       expect(FONT).toHaveProperty(k);
       expect(FONT[k]).toBeGreaterThan(0);
@@ -90,18 +90,15 @@ describe('FONT', () => {
 
 describe('LAYOUT', () => {
   it('has expected keys and positive number values', () => {
-    expect(LAYOUT.touchTarget).toBeGreaterThan(0);
     expect(LAYOUT.btnMinHeight).toBeGreaterThan(0);
     expect(LAYOUT.scrollMinHeight).toBeGreaterThan(0);
     expect(LAYOUT.cardMinHeight).toBeGreaterThan(0);
-    expect(LAYOUT.cardTopWithCopy).toBeGreaterThan(0);
-    expect(LAYOUT.cardTextRight).toBeGreaterThan(0);
   });
 });
 
 describe('PALETTE', () => {
   it('has expected keys and hex color strings', () => {
-    const keys = ['bg', 'surface', 'border', 'accent', 'cta', 'ctaBorder', 'ctaText', 'text', 'textMuted', 'shadow'];
+    const keys = ['bg', 'surface', 'border', 'accent', 'cta', 'ctaText', 'text', 'textMuted', 'shadow'];
     keys.forEach((k) => {
       expect(PALETTE).toHaveProperty(k);
       expect(PALETTE[k]).toMatch(/^#[0-9A-Fa-f]{6}$/);

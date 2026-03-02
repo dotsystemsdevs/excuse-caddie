@@ -10,22 +10,24 @@ describe('EXCUSES', () => {
     expect(EXCUSES.length).toBeGreaterThanOrEqual(140);
   });
 
-  it('every item is a non-empty string', () => {
+  it('every item has a non-empty text string and tags array', () => {
     EXCUSES.forEach((excuse, i) => {
-      expect(typeof excuse).toBe('string');
-      expect(excuse.trim().length).toBeGreaterThan(0);
+      expect(typeof excuse.text).toBe('string');
+      expect(excuse.text.trim().length).toBeGreaterThan(0);
+      expect(Array.isArray(excuse.tags)).toBe(true);
     });
   });
 
   it('no duplicate excuses', () => {
-    const set = new Set(EXCUSES);
+    const texts = EXCUSES.map((e) => e.text);
+    const set = new Set(texts);
     expect(set.size).toBe(EXCUSES.length);
   });
 
   it('no item is only whitespace', () => {
     EXCUSES.forEach((excuse) => {
-      expect(excuse.trim()).toBe(excuse);
-      expect(excuse).not.toBe('');
+      expect(excuse.text.trim()).toBe(excuse.text);
+      expect(excuse.text).not.toBe('');
     });
   });
 });
