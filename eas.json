@@ -12,5 +12,12 @@
       "ios": { "simulator": true }
     },
     "production": {}
+  },
+  "submit": {
+    "production": {
+      "ios": {
+        "ascAppId": "6759191239"
+      }
+    }
   }
 }
