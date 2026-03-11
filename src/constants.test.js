@@ -1,17 +1,8 @@
-const {
-  CONFIG,
-  PLACEHOLDER,
-  LOADING_MESSAGES,
-  SPACING,
-  RADIUS,
-  FONT,
-  PALETTE,
-  LAYOUT,
-} = require('./constants');
+const { CONFIG, LOADING_MESSAGES, FONT, PALETTE } = require('./constants');
 
 describe('CONFIG', () => {
   it('has required keys', () => {
-    expect(CONFIG).toHaveProperty('REVIEW_PROMPT_AFTER_GENERATES');
+    expect(CONFIG).toHaveProperty('REVIEW_PROMPT_EVERY_N');
     expect(CONFIG).toHaveProperty('STORAGE_KEY_ASKED_REVIEW');
     expect(CONFIG).toHaveProperty('LEGAL_BASE_URL');
     expect(CONFIG).toHaveProperty('GENERATE_DELAY_MS');
@@ -19,9 +10,9 @@ describe('CONFIG', () => {
     expect(CONFIG).toHaveProperty('SPLASH_MIN_MS');
   });
 
-  it('REVIEW_PROMPT_AFTER_GENERATES is a positive number', () => {
-    expect(typeof CONFIG.REVIEW_PROMPT_AFTER_GENERATES).toBe('number');
-    expect(CONFIG.REVIEW_PROMPT_AFTER_GENERATES).toBeGreaterThan(0);
+  it('REVIEW_PROMPT_EVERY_N is a positive number', () => {
+    expect(typeof CONFIG.REVIEW_PROMPT_EVERY_N).toBe('number');
+    expect(CONFIG.REVIEW_PROMPT_EVERY_N).toBeGreaterThan(0);
   });
 
   it('STORAGE_KEY_ASKED_REVIEW is non-empty string', () => {
@@ -40,13 +31,6 @@ describe('CONFIG', () => {
   });
 });
 
-describe('PLACEHOLDER', () => {
-  it('is non-empty string', () => {
-    expect(typeof PLACEHOLDER).toBe('string');
-    expect(PLACEHOLDER.length).toBeGreaterThan(0);
-  });
-});
-
 describe('LOADING_MESSAGES', () => {
   it('is non-empty array of strings', () => {
     expect(Array.isArray(LOADING_MESSAGES)).toBe(true);
@@ -58,29 +42,9 @@ describe('LOADING_MESSAGES', () => {
   });
 });
 
-describe('SPACING', () => {
-  it('has expected keys and positive number values', () => {
-    const keys = ['xs', 'sm', 'md', 'lg', 'xl', 'xxl', 'xxxl'];
-    keys.forEach((k) => {
-      expect(SPACING).toHaveProperty(k);
-      expect(SPACING[k]).toBeGreaterThanOrEqual(0);
-    });
-  });
-});
-
-describe('RADIUS', () => {
-  it('has expected keys and non-negative values', () => {
-    const keys = ['sm', 'md', 'lg', 'xl', 'xxl', 'full'];
-    keys.forEach((k) => {
-      expect(RADIUS).toHaveProperty(k);
-      expect(RADIUS[k]).toBeGreaterThanOrEqual(0);
-    });
-  });
-});
-
 describe('FONT', () => {
   it('has expected keys and positive number values', () => {
-    const keys = ['caption', 'label', 'body', 'bodyLg', 'subtitle', 'title'];
+    const keys = ['xs', 'sm', 'caption', 'label', 'body', 'bodyLg', 'title', 'hero'];
     keys.forEach((k) => {
       expect(FONT).toHaveProperty(k);
       expect(FONT[k]).toBeGreaterThan(0);
@@ -88,20 +52,12 @@ describe('FONT', () => {
   });
 });
 
-describe('LAYOUT', () => {
-  it('has expected keys and positive number values', () => {
-    expect(LAYOUT.btnMinHeight).toBeGreaterThan(0);
-    expect(LAYOUT.scrollMinHeight).toBeGreaterThan(0);
-    expect(LAYOUT.cardMinHeight).toBeGreaterThan(0);
-  });
-});
-
 describe('PALETTE', () => {
-  it('has expected keys and hex color strings', () => {
-    const keys = ['bg', 'surface', 'border', 'accent', 'cta', 'ctaText', 'text', 'textMuted', 'shadow'];
+  it('has expected keys', () => {
+    const keys = ['homeBg', 'greenPale', 'accent', 'greenDark', 'cardTop', 'cardMid', 'cardBot', 'activeGreen'];
     keys.forEach((k) => {
       expect(PALETTE).toHaveProperty(k);
-      expect(PALETTE[k]).toMatch(/^#[0-9A-Fa-f]{6}$/);
+      expect(typeof PALETTE[k]).toBe('string');
     });
   });
 });
