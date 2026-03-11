@@ -19,7 +19,7 @@
       "config": {
         "usesNonExemptEncryption": false
       },
-      "buildNumber": "3"
+      "buildNumber": "4"
     },
     "android": {
       "adaptiveIcon": {
@@ -28,8 +28,15 @@
       },
       "edgeToEdgeEnabled": true,
       "package": "com.dotsystems.appgolfexcuse",
-      "versionCode": 3,
-      "playStoreUrl": "https://play.google.com/store/apps/details?id=com.dotsystems.appgolfexcuse"
+      "versionCode": 4,
+      "playStoreUrl": "https://play.google.com/store/apps/details?id=com.dotsystems.appgolfexcuse",
+      "permissions": [
+        "android.permission.INTERNET",
+        "android.permission.VIBRATE"
+      ],
+      "blockedPermissions": [
+        "android.permission.ACTIVITY_RECOGNITION"
+      ]
     },
     "web": {
       "favicon": "./assets/favicon.png"
