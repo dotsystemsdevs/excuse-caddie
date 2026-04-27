@@ -139,28 +139,32 @@ export default function HomePage() {
         </p>
 
         {/* Excuse panel — clean cream card */}
-        <section
-          id="excuse"
-          aria-labelledby="excuse-h"
-          className="excuse-panel relative w-full mt-5 sm:mt-6 px-6 sm:px-10 py-7 sm:py-9 min-h-[9.5rem] sm:min-h-[10.5rem] flex items-center justify-center"
-        >
-          <h2 id="excuse-h" className="sr-only">Today's ruling</h2>
+        <div className="relative w-full mt-5 sm:mt-6">
+          <section
+            id="excuse"
+            aria-labelledby="excuse-h"
+            className="excuse-panel w-full px-6 sm:px-10 py-7 sm:py-9 min-h-[9.5rem] sm:min-h-[10.5rem] flex items-center justify-center"
+          >
+            <h2 id="excuse-h" className="sr-only">Today's ruling</h2>
+            <p
+              key={genCount}
+              className="fade-in text-center text-[1.15rem] sm:text-[1.45rem] lg:text-[1.55rem] leading-[1.32] font-semibold tracking-[-0.01em] text-balance max-w-xl mx-auto"
+              style={{ color: '#1A1916' }}
+            >
+              {cardText}
+            </p>
+          </section>
+
+          {/* Vote buttons — top-right, slightly above the card */}
           <div
-            className="absolute top-3 right-3 sm:top-3.5 sm:right-3.5 flex items-center gap-2"
+            className="absolute -top-4 right-3 sm:right-4 flex items-center gap-2"
             role="group"
             aria-label="Rate this ruling"
           >
             <ThumbButton direction="down" active={vote === 'down'} onClick={() => handleVote('down')} />
             <ThumbButton direction="up" active={vote === 'up'} onClick={() => handleVote('up')} />
           </div>
-          <p
-            key={genCount}
-            className="fade-in text-center text-[1.15rem] sm:text-[1.45rem] lg:text-[1.55rem] leading-[1.32] font-semibold tracking-[-0.01em] text-balance max-w-xl mx-auto"
-            style={{ color: '#1A1916' }}
-          >
-            {cardText}
-          </p>
-        </section>
+        </div>
 
         {/* Yellow CTA */}
         <button
