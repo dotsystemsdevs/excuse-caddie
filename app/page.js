@@ -5,7 +5,7 @@ import TopBanner from '@/components/TopBanner';
 import Footer from '@/components/Footer';
 import CountUp from '@/components/CountUp';
 import { track } from '@vercel/analytics';
-import { EXCUSES, getDailyExcuse } from '@/lib/excuses';
+import { EXCUSES, EXCUSE_COUNT, getDailyExcuse } from '@/lib/excuses';
 import { getExcuseText, pickDifferentWeighted } from '@/lib/utils';
 import { getExcuseId } from '@/lib/excuse-ids';
 import { fetchGeneratedTotal, trackGenerated, voteForExcuse } from '@/lib/api';
@@ -53,6 +53,8 @@ export default function HomePage() {
   const [genCount, setGenCount] = useState(0);
   const [globalTotal, setGlobalTotal] = useState(null);
   const [baseUrl, setBaseUrl] = useState('');
+  const [pickNumber, setPickNumber] = useState('');
+  const [pickError, setPickError] = useState('');
 
   const [ctaLabel, setCtaLabel] = useState(CTA_FIRST);
 
@@ -91,6 +93,23 @@ export default function HomePage() {
       if (typeof t === 'number' && t > 0) setGlobalTotal(t);
     });
   }, [cardText]);
+
+  const handlePickByNumber = useCallback((raw) => {
+    const n = Number.parseInt(String(raw || '').trim(), 10);
+    if (!Number.isFinite(n) || n < 1 || n > EXCUSE_COUNT) {
+      setPickError(`Enter a number from 1 to ${EXCUSE_COUNT}.`);
+      return;
+    }
+    setPickError('');
+    const txt = EXCUSES[n - 1]?.text;
+    const nextId = getExcuseId(txt);
+    setExcuse(txt);
+    setCurrentExcuseId(nextId);
+    setVote(null);
+    setHasGenerated(true);
+    setGenCount((c) => c + 1);
+    track('pick_excuse_by_number', { excuseId: nextId || 'unknown', number: n, source: 'picker' });
+  }, []);
 
   const handleVote = useCallback(async (direction) => {
     setVote((prev) => {
@@ -152,6 +171,52 @@ export default function HomePage() {
             </span>
           </span>
         </p>
+
+        <p
+          className="mt-1 text-center"
+          style={{ color: 'rgba(245,241,232,0.45)' }}
+        >
+          <span className="text-[10px] sm:text-[11px] font-medium uppercase tracking-[0.18em]">
+            {EXCUSE_COUNT} excuses available
+          </span>
+        </p>
+
+        <form
+          className="mt-3 w-full max-w-md mx-auto"
+          onSubmit={(e) => {
+            e.preventDefault();
+            handlePickByNumber(pickNumber);
+          }}
+        >
+          <div className="flex items-center gap-2">
+            <input
+              value={pickNumber}
+              onChange={(e) => setPickNumber(e.target.value)}
+              inputMode="numeric"
+              placeholder={`Pick # (1–${EXCUSE_COUNT})`}
+              aria-label={`Pick an excuse by number (1 to ${EXCUSE_COUNT})`}
+              className="w-full rounded-[14px] px-4 py-3 text-[14px] sm:text-[15px] font-semibold tabular-nums"
+              style={{
+                background: 'rgba(245,241,232,0.92)',
+                color: '#1A1916',
+                border: '1px solid rgba(26,25,22,0.16)',
+                boxShadow: 'var(--sh-1)',
+              }}
+            />
+            <button
+              type="submit"
+              className="btn-press rounded-[14px] px-4 py-3 text-[12px] sm:text-[13px] font-extrabold uppercase tracking-[0.14em] cursor-pointer"
+              style={{ background: 'rgba(245,241,232,0.18)' }}
+            >
+              Go
+            </button>
+          </div>
+          {pickError ? (
+            <p className="mt-2 text-center text-[12px] font-semibold" style={{ color: 'rgba(245,241,232,0.72)' }}>
+              {pickError}
+            </p>
+          ) : null}
+        </form>
 
         {/* Excuse panel — clean cream card */}
         <div className="relative w-full mt-5 sm:mt-6">
