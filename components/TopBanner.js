@@ -9,7 +9,7 @@ export default function TopBanner() {
   useEffect(() => {
     let cancelled = false;
     fetchLeaderboard('all')
-      .then((rows) => { if (!cancelled) setTop((rows || []).slice(0, 3)); })
+      .then((rows) => { if (!cancelled) setTop((rows || []).slice(0, 20)); })
       .catch(() => { if (!cancelled) setTop([]); });
     return () => { cancelled = true; };
   }, []);
@@ -36,17 +36,24 @@ export default function TopBanner() {
             Be the first to vote
           </span>
         ) : (
-          <div className="w-full min-w-0 overflow-x-auto scrollbar-hide">
-            <div className="inline-flex items-center justify-center gap-3 sm:gap-4 whitespace-nowrap px-2">
-              {top.map((item, i) => (
-                <span key={item.id} className="inline-flex items-center gap-2 font-medium text-[11px] sm:text-[12px] min-w-0">
-                  <span className="font-bold opacity-85" style={{ color: 'var(--color-yellow)' }}>#{i + 1}</span>
-                  <span className="opacity-95 truncate max-w-[10rem] sm:max-w-[14rem] md:max-w-[18rem]">{item.text}</span>
+          <div className="ticker-wrap w-full min-w-0 overflow-hidden">
+            <div className="ticker-row">
+              {[...top, ...top].map((item, idx) => (
+                <span
+                  key={`${item.id}-${idx}`}
+                  className="inline-flex items-center gap-2 font-medium text-[11px] sm:text-[12px] min-w-0 px-3"
+                >
+                  <span className="font-bold opacity-85" style={{ color: 'var(--color-yellow)' }}>
+                    #{(idx % top.length) + 1}
+                  </span>
+                  <span className="opacity-95 truncate max-w-[14rem] sm:max-w-[18rem] md:max-w-[24rem]">
+                    {item.text}
+                  </span>
                   <span className="inline-flex items-center gap-1 opacity-70 tabular-nums">
                     <ThumbsUpInline />
                     {item.votes}
                   </span>
-                  {i < top.length - 1 && <span aria-hidden className="opacity-25 mx-1.5">·</span>}
+                  <span aria-hidden className="opacity-20 pl-2">·</span>
                 </span>
               ))}
             </div>
