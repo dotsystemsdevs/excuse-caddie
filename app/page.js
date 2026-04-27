@@ -53,8 +53,6 @@ export default function HomePage({ initialPickNumber = null } = {}) {
   const [genCount, setGenCount] = useState(0);
   const [globalTotal, setGlobalTotal] = useState(null);
   const [baseUrl, setBaseUrl] = useState('');
-  const [pickNumber, setPickNumber] = useState('');
-  const [pickError, setPickError] = useState('');
 
   const [ctaLabel, setCtaLabel] = useState(CTA_FIRST);
 
@@ -96,11 +94,7 @@ export default function HomePage({ initialPickNumber = null } = {}) {
 
   const handlePickByNumber = useCallback((raw) => {
     const n = Number.parseInt(String(raw || '').trim(), 10);
-    if (!Number.isFinite(n) || n < 1 || n > EXCUSE_COUNT) {
-      setPickError(`Enter a number from 1 to ${EXCUSE_COUNT}.`);
-      return;
-    }
-    setPickError('');
+    if (!Number.isFinite(n) || n < 1 || n > EXCUSE_COUNT) return;
     const txt = EXCUSES[n - 1]?.text;
     const nextId = getExcuseId(txt);
     setExcuse(txt);
@@ -113,7 +107,6 @@ export default function HomePage({ initialPickNumber = null } = {}) {
 
   useEffect(() => {
     if (initialPickNumber == null) return;
-    setPickNumber(String(initialPickNumber));
     handlePickByNumber(initialPickNumber);
   }, [initialPickNumber, handlePickByNumber]);
 
@@ -186,43 +179,6 @@ export default function HomePage({ initialPickNumber = null } = {}) {
             {EXCUSE_COUNT} excuses available
           </span>
         </p>
-
-        <form
-          className="mt-3 w-full max-w-md mx-auto"
-          onSubmit={(e) => {
-            e.preventDefault();
-            handlePickByNumber(pickNumber);
-          }}
-        >
-          <div className="flex items-center gap-2">
-            <input
-              value={pickNumber}
-              onChange={(e) => setPickNumber(e.target.value)}
-              inputMode="numeric"
-              placeholder={`Pick # (1–${EXCUSE_COUNT})`}
-              aria-label={`Pick an excuse by number (1 to ${EXCUSE_COUNT})`}
-              className="w-full rounded-[14px] px-4 py-3 text-[14px] sm:text-[15px] font-semibold tabular-nums"
-              style={{
-                background: 'rgba(245,241,232,0.92)',
-                color: '#1A1916',
-                border: '1px solid rgba(26,25,22,0.16)',
-                boxShadow: 'var(--sh-1)',
-              }}
-            />
-            <button
-              type="submit"
-              className="btn-press rounded-[14px] px-4 py-3 text-[12px] sm:text-[13px] font-extrabold uppercase tracking-[0.14em] cursor-pointer"
-              style={{ background: 'rgba(245,241,232,0.18)' }}
-            >
-              Go
-            </button>
-          </div>
-          {pickError ? (
-            <p className="mt-2 text-center text-[12px] font-semibold" style={{ color: 'rgba(245,241,232,0.72)' }}>
-              {pickError}
-            </p>
-          ) : null}
-        </form>
 
         {/* Excuse panel — clean cream card */}
         <div className="relative w-full mt-5 sm:mt-6">
