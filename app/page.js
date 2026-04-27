@@ -44,7 +44,7 @@ function pickRandomLabel(prev) {
   return next;
 }
 
-export default function HomePage() {
+export default function HomePage({ initialPickNumber = null } = {}) {
   const [excuse, setExcuse] = useState(null);
   const [currentExcuseId, setCurrentExcuseId] = useState(null);
   const [vote, setVote] = useState(null);
@@ -110,6 +110,12 @@ export default function HomePage() {
     setGenCount((c) => c + 1);
     track('pick_excuse_by_number', { excuseId: nextId || 'unknown', number: n, source: 'picker' });
   }, []);
+
+  useEffect(() => {
+    if (initialPickNumber == null) return;
+    setPickNumber(String(initialPickNumber));
+    handlePickByNumber(initialPickNumber);
+  }, [initialPickNumber, handlePickByNumber]);
 
   const handleVote = useCallback(async (direction) => {
     setVote((prev) => {
