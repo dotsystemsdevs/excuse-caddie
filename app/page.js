@@ -130,11 +130,13 @@ export default function HomePage() {
           style={{ color: 'rgba(245,241,232,0.55)' }}
           aria-live="polite"
         >
-          <span className="font-semibold" style={{ color: 'var(--color-yellow)', letterSpacing: '0.01em' }}>
-            <CountUp value={globalTotal !== null ? globalTotal : FALLBACK_TOTAL} />
-          </span>
-          <span className="text-[11px] sm:text-[12px] font-medium uppercase tracking-[0.18em] ml-2">
-            alibis dealt
+          <span className="inline-flex items-baseline gap-2">
+            <span className="font-semibold" style={{ color: 'var(--color-yellow)', letterSpacing: '0.01em' }}>
+              <CountUp value={globalTotal !== null ? globalTotal : FALLBACK_TOTAL} />
+            </span>
+            <span className="text-[11px] sm:text-[12px] font-medium uppercase tracking-[0.18em]">
+              alibis on the card
+            </span>
           </span>
         </p>
 
