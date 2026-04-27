@@ -1,4 +1,5 @@
 import './globals.css';
+import { Analytics } from '@vercel/analytics/next';
 
 const TAGLINE = 'Tap the button. Get an ironclad excuse for that round.';
 
@@ -39,6 +40,7 @@ export default function RootLayout({ children }) {
       </head>
       <body className="h-dvh overflow-hidden selection:bg-white/30 selection:text-white">
         {children}
+        <Analytics />
       </body>
     </html>
   );
