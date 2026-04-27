@@ -4,6 +4,7 @@ import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import TopBanner from '@/components/TopBanner';
 import Footer from '@/components/Footer';
 import CountUp from '@/components/CountUp';
+import { track } from '@vercel/analytics';
 import { EXCUSES, getDailyExcuse } from '@/lib/excuses';
 import { getExcuseText, pickDifferentWeighted } from '@/lib/utils';
 import { getExcuseId } from '@/lib/excuse-ids';
@@ -77,20 +78,31 @@ export default function HomePage() {
     playSplash();
     const picked = pickDifferentWeighted(EXCUSES, cardText, seenExcuses.current);
     const txt = getExcuseText(picked);
+    const nextId = getExcuseId(txt);
     setExcuse(txt);
-    setCurrentExcuseId(getExcuseId(txt));
+    setCurrentExcuseId(nextId);
     setVote(null);
     setHasGenerated(true);
     setGenCount((c) => c + 1);
     setCtaLabel((prev) => pickRandomLabel(prev));
     setGlobalTotal((cur) => (cur == null ? cur : cur + 1));
+    track('generate_excuse', { excuseId: nextId, source: 'cta' });
     trackGenerated().then((t) => {
       if (typeof t === 'number' && t > 0) setGlobalTotal(t);
     });
   }, [cardText]);
 
   const handleVote = useCallback(async (direction) => {
-    setVote((prev) => (prev === direction ? null : direction));
+    setVote((prev) => {
+      const next = prev === direction ? null : direction;
+      track('vote_excuse', {
+        excuseId: currentExcuseId || 'unknown',
+        direction,
+        action: next ? 'vote' : 'unvote',
+        surface: 'thumb_buttons',
+      });
+      return next;
+    });
     if (currentExcuseId) {
       try {
         const res = await voteForExcuse(currentExcuseId, direction);
@@ -107,8 +119,9 @@ export default function HomePage() {
       await navigator.clipboard.writeText(`"${cardText}" — Excuse Caddie ${baseUrl}`);
       setCopied(true);
       setTimeout(() => setCopied(false), 1800);
+      track('share_copy', { excuseId: currentExcuseId || 'unknown', success: true });
     } catch {}
-  }, [cardText, baseUrl]);
+  }, [cardText, baseUrl, currentExcuseId]);
 
   return (
     <main className="relative flex h-dvh max-h-dvh overflow-hidden flex-col" id="main">
@@ -179,13 +192,27 @@ export default function HomePage() {
 
         {/* Race share row */}
         <div className="mt-4 sm:mt-5 flex items-center justify-center gap-2 sm:gap-2.5" aria-label="Share">
-          <SharePill href={fbUrl} variant="blue" ariaLabel="Share on Facebook">
+          <SharePill
+            href={fbUrl}
+            variant="blue"
+            ariaLabel="Share on Facebook"
+            onClick={() => track('share_open', { network: 'facebook', excuseId: currentExcuseId || 'unknown' })}
+          >
             <FbIcon /> <span>Facebook</span>
           </SharePill>
-          <SharePill href={xUrl} variant="black" ariaLabel="Post on X">
+          <SharePill
+            href={xUrl}
+            variant="black"
+            ariaLabel="Post on X"
+            onClick={() => track('share_open', { network: 'x', excuseId: currentExcuseId || 'unknown' })}
+          >
             <XIcon /> <span>X</span>
           </SharePill>
-          <SharePill onClick={handleCopy} variant="red" ariaLabel={copied ? 'Pocketed' : 'Pocket this excuse'}>
+          <SharePill
+            onClick={handleCopy}
+            variant="red"
+            ariaLabel={copied ? 'Pocketed' : 'Pocket this excuse'}
+          >
             {copied ? <CheckIcon /> : <CopyIcon />}
             <span>{copied ? 'Pocketed' : 'Pocket it'}</span>
           </SharePill>
@@ -237,7 +264,7 @@ function ThumbIcon({ up }) {
 function SharePill({ href, onClick, variant, ariaLabel, children }) {
   const Tag = href ? 'a' : 'button';
   const props = href
-    ? { href, target: '_blank', rel: 'noopener noreferrer' }
+    ? { href, target: '_blank', rel: 'noopener noreferrer', onClick }
     : { onClick, type: 'button' };
 
   const variantClass = variant === 'blue' ? 'btn-blue'
