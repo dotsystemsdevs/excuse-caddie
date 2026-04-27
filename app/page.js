@@ -142,7 +142,7 @@ export default function HomePage() {
         <section
           id="excuse"
           aria-labelledby="excuse-h"
-          className="excuse-panel relative w-full px-6 sm:px-10 py-7 sm:py-9 mt-5 sm:mt-6"
+          className="excuse-panel relative w-full mt-5 sm:mt-6 px-6 sm:px-10 py-7 sm:py-9 min-h-[9.5rem] sm:min-h-[10.5rem] flex items-center justify-center"
         >
           <h2 id="excuse-h" className="sr-only">Today's ruling</h2>
           <p
@@ -152,12 +152,16 @@ export default function HomePage() {
           >
             {cardText}
           </p>
-
-          <div className="mt-4 sm:mt-5 flex items-center justify-end gap-2" role="group" aria-label="Rate this ruling">
-            <ThumbButton direction="down" active={vote === 'down'} onClick={() => handleVote('down')} />
-            <ThumbButton direction="up" active={vote === 'up'} onClick={() => handleVote('up')} />
-          </div>
         </section>
+
+        <div
+          className="mt-4 sm:mt-5 flex items-center justify-center gap-2"
+          role="group"
+          aria-label="Rate this ruling"
+        >
+          <ThumbButton direction="down" active={vote === 'down'} onClick={() => handleVote('down')} />
+          <ThumbButton direction="up" active={vote === 'up'} onClick={() => handleVote('up')} />
+        </div>
 
         {/* Yellow CTA */}
         <button
