@@ -124,20 +124,28 @@ export default function HomePage() {
           Excuse Caddie
         </h1>
 
-        {/* Counter — quiet inline text, no bubble */}
-        <p
-          className="mt-3 sm:mt-4 text-[13px] sm:text-[14px] tabular-nums text-center"
-          style={{ color: 'rgba(245,241,232,0.55)' }}
-          aria-live="polite"
-        >
+        {/* Counter — small clubhouse statline */}
+        <div className="mt-3.5 sm:mt-4 flex items-center justify-center gap-2 text-center tabular-nums">
           <span
-            className="font-semibold"
-            style={{ color: 'var(--color-yellow)', letterSpacing: '0.01em' }}
+            className="inline-flex items-baseline gap-2 px-3 py-1 rounded-full border"
+            style={{
+              borderColor: 'rgba(255,255,255,0.14)',
+              background: 'rgba(0,0,0,0.10)',
+              color: 'rgba(245,241,232,0.70)',
+            }}
+            aria-live="polite"
           >
-            <CountUp value={globalTotal !== null ? globalTotal : FALLBACK_TOTAL} />
+            <span
+              className="font-semibold"
+              style={{ color: 'var(--color-yellow)', letterSpacing: '0.01em' }}
+            >
+              <CountUp value={globalTotal !== null ? globalTotal : FALLBACK_TOTAL} />
+            </span>
+            <span className="text-[11px] sm:text-[12px] font-medium uppercase tracking-[0.18em]">
+              excuses dealt
+            </span>
           </span>
-          <span className="font-medium"> served — and counting</span>
-        </p>
+        </div>
 
         {/* Excuse panel — clean cream card */}
         <section
