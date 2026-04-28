@@ -1,91 +1,59 @@
 # Roadmap
 
-**Aktuell version:** `v1.0.0` · **Nästa planerade:** `v1.1.0`
+A loose backlog. Nothing here is committed — open an issue or PR if you want to push something forward.
 
-**Var version sätts:** `app.json` (expo.version), `package.json` (version), `app.json` (android.versionCode endast för Android).
-
----
-
-## Released
-
-### v1.0.0 — Feb 2026
-
-Första release (App Store & Google Play).
-
-| Ändring | Typ |
-|--------|------|
-| Slumpmässig golfursäkt från 150+ alternativ | Feature |
-| Kopiera till urklipp med "Copied!"-feedback | Feature |
-| Uppmaning att betygsätta efter 3 genereringar | Feature |
-| In-app uppdateringskontroll (Expo Updates) med reload-banner | Feature |
-| Länkar till Privacy & Terms i sidfot (app-legal-docs) | Legal |
-| VoiceOver / TalkBack och reduce-motion | Polish |
-| EAS Build (iOS bundleIdentifier, Android package) | Build |
-| 100 % offline — inga konton, ingen spårning | Privacy |
+The mobile-app roadmap from before the Next.js rewrite has been retired; that history lives in the git log if you want to dig.
 
 ---
 
-## Bugs
+## Recently shipped
 
-| Bug | Prioritet | Status |
-|-----|-----------|--------|
-| *(inga öppna)* | — | — |
+- Per-excuse URLs (`/1` … `/268`) so a shared link survives the trip across Reddit, X, iMessage
+- Dynamic 1200×630 OG images per excuse via `next/og`
+- Reddit share button (Reddit was already the top referrer)
+- Web Share API on mobile with clipboard fallback
+- Sitemap (269 URLs) + robots.txt
+- JSON-LD `WebSite` / `WebApplication` / `Organization` for brand recognition
 
----
+## Now
 
-## Build-checklista (före varje release)
+| Item | Why | Status |
+|------|-----|--------|
+| Reach 300 excuses | Crowd-sourced excuse list is the moat | open ([#issue](https://github.com/dotsystemsdevs/excuse-caddie/issues)) |
+| Per-category browse pages (`/weather`, `/equipment`, …) | More indexable surface for organic SEO | idea |
 
-**iOS:** Gå igenom [IOS_APP_STORE_CHECKLIST.md](IOS_APP_STORE_CHECKLIST.md) innan submission.
+## Soon
 
-1. **Höj version** i `app.json` och `package.json` (t.ex. 1.0.0 → 1.1.0).
-2. **Android:** Sätt `android.versionCode` i `app.json` till ett högre heltal än föregående release.
-3. **Kör:** `npx expo-doctor` och åtgärda eventuella fel.
-4. **Bygg:** `eas build --platform all --profile production`
-5. **Ladda upp:** Till App Store Connect (iOS) och Google Play Console (Android), eller använd `eas submit`.
+| Item | Why |
+|------|-----|
+| "Excuse of the day" fixed page | Stable URL for daily share habit |
+| Server-rendered share fallback | The share buttons currently populate the URL only after JS hydrates |
+| Localization (Swedish first) | Bigger reach |
+| Light/dark theme toggle | Polish |
 
-**Aktuellt versionCode (Android):** `1` (v1.0.0)
+## Maybe
 
----
+| Item | Notes |
+|------|-------|
+| Generate a shareable PNG card with the chosen excuse on it | More striking on mobile than a link preview |
+| `/api/random.json` | A tiny public API so other golf apps can pull excuses |
+| `vote_excuse` decay so the leaderboard reflects recent rounds | Avoid stale top-20 |
+| Optional haptics on mobile generate | Tiny moment of delight |
 
-## Planerat — v1.1.0
+## Out of scope
 
-| Feature | Prioritet | Typ |
-|---------|-----------|------|
-| *(TBD)* | — | — |
-
----
-
-## Community Requests — v1.1.0+
-
-Önskemål från användare. Nice to have.
-
-| Feature | Prioritet | Typ | Källa |
-|---------|-----------|-----|--------|
-| *(inga än)* | — | — | — |
-
----
-
-## Framtida idéer
-
-| Idé | Prioritet | Notering |
-|-----|-----------|----------|
-| Fler kategorier/teman för ursäkter | P3 | Mer innehåll |
-| Dela ursäkt som bild / socialt kort | P3 | Delning |
-| Lokalisering (t.ex. svenska) | P3 | Större reach |
-| Valfri ljud/haptik vid generering | P3 | Polish |
+- Native mobile apps (we shipped one, retired it; the web app does the job)
+- User accounts or auth — the no-account vibe is part of the product
+- Tracking beyond anonymous Vercel Analytics events
 
 ---
 
-## Community Highlights
+## Priority guide
 
-*(Citat från användare efter release.)*
+| Level | Meaning |
+|-------|---------|
+| **P1** | Critical — fix before next deploy |
+| **P2** | Important — current sprint |
+| **P3** | Nice to have — future backlog |
 
----
-
-## Prioritetsguide
-
-| Nivå | Betydelse |
-|------|-----------|
-| **P1** | Kritisk — fixa före nästa release |
-| **P2** | Viktig — sikta på aktuell milstolpe |
-| **P3** | Nice to have — framtida backlog |
+If you want to claim something here, open an issue and say so before opening the PR — saves people stepping on each other.

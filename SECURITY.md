@@ -4,27 +4,23 @@
 
 Please **do not** open a public issue for security-sensitive problems.
 
-Instead:
+Instead, choose one of:
 
-- Open a **GitHub Security Advisory**, or
-- Email the maintainers (if listed on the GitHub org/profile).
+1. Open a [GitHub Security Advisory](https://github.com/dotsystemsdevs/excuse-caddie/security/advisories/new) on this repo.
+2. Email `security@dotsystems.dev`.
 
-We’ll acknowledge receipt and work on a fix as quickly as possible.
+We aim to acknowledge receipt within 48 hours and ship a fix for critical issues within 7 days.
 
-# Security Policy
+## Scope
 
-## Supported Versions
+This site is a static-leaning Next.js app on Vercel with a small Redis-backed counter and leaderboard. The pieces that are worth poking at:
 
-| Version | Supported |
-| ------- | --------- |
-| 1.3.x   | Yes       |
-| < 1.3   | No        |
+- `app/api/*` — rate-limited public endpoints (`/api/generated`, `/api/vote`, `/api/leaderboard`, `/api/sounds`)
+- `lib/rate-limit.js` — per-IP throttling
+- `lib/redis.js` — Upstash key helpers (counter, leaderboard, vote dedup)
 
-## Reporting a Vulnerability
+Out of scope: third-party hosts (Vercel, Upstash), social-share targets, freesound.org clips.
 
-If you discover a security vulnerability, please report it responsibly:
+## Supported versions
 
-1. **Email**: security@dotsystems.dev
-2. **Do not** open a public GitHub issue for security vulnerabilities.
-
-We will acknowledge your report within 48 hours and aim to release a fix within 7 days for critical issues.
+The site is a single-tenant deployment — only `main` is supported. Vulnerabilities in older mobile-app commits (pre-rewrite) won't be patched unless they affect the current web build.
