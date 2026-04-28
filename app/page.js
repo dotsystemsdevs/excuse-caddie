@@ -45,24 +45,28 @@ function pickRandomLabel(prev) {
 }
 
 export default function HomePage({ initialPickNumber = null } = {}) {
-  const [excuse, setExcuse] = useState(null);
-  const [currentExcuseId, setCurrentExcuseId] = useState(null);
+  const pickedFromUrl = useMemo(() => {
+    if (initialPickNumber == null) return null;
+    const n = Number.parseInt(String(initialPickNumber).trim(), 10);
+    if (!Number.isFinite(n) || n < 1 || n > EXCUSE_COUNT) return null;
+    return EXCUSES[n - 1]?.text || null;
+  }, [initialPickNumber]);
+  const dailyExcuse = useMemo(() => getDailyExcuse(EXCUSES), []);
+  const initialText = pickedFromUrl || dailyExcuse.text;
+
+  const [excuse, setExcuse] = useState(pickedFromUrl);
+  const [currentExcuseId, setCurrentExcuseId] = useState(() => getExcuseId(initialText));
   const [vote, setVote] = useState(null);
-  const [hasGenerated, setHasGenerated] = useState(false);
+  const [hasGenerated, setHasGenerated] = useState(Boolean(pickedFromUrl));
   const [copied, setCopied] = useState(false);
   const [genCount, setGenCount] = useState(0);
   const [globalTotal, setGlobalTotal] = useState(null);
-  const [baseUrl, setBaseUrl] = useState('');
+  const [baseUrl, setBaseUrl] = useState('https://excusecaddie.xyz');
 
   const [ctaLabel, setCtaLabel] = useState(CTA_FIRST);
 
   const seenExcuses = useRef(new Set());
-  const dailyExcuse = useMemo(() => getDailyExcuse(EXCUSES), []);
   const cardText = excuse || dailyExcuse.text;
-
-  useEffect(() => {
-    setCurrentExcuseId(getExcuseId(dailyExcuse.text));
-  }, [dailyExcuse]);
 
   useEffect(() => {
     fetchGeneratedTotal()
@@ -105,10 +109,6 @@ export default function HomePage({ initialPickNumber = null } = {}) {
     track('pick_excuse_by_number', { excuseId: nextId || 'unknown', number: n, source: 'picker' });
   }, []);
 
-  useEffect(() => {
-    if (initialPickNumber == null) return;
-    handlePickByNumber(initialPickNumber);
-  }, [initialPickNumber, handlePickByNumber]);
 
   const handleVote = useCallback(async (direction) => {
     setVote((prev) => {
