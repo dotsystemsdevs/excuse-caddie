@@ -1,7 +1,7 @@
 import { useState, useRef, useCallback, useMemo, useEffect, Component } from 'react';
 import {
   View, Text, Pressable, StyleSheet, Animated, Linking, Platform,
-  AccessibilityInfo, Dimensions, Share,
+  AccessibilityInfo, Dimensions, Share, Image,
 } from 'react-native';
 import Svg, { Path, Defs, Filter, FeTurbulence, Rect, G } from 'react-native-svg';
 import { SafeAreaProvider, SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context';
@@ -27,6 +27,7 @@ import {
 } from './src/api';
 
 const { width: SCREEN_W } = Dimensions.get('window');
+const LOGO = require('./assets/logo.png');
 
 // Type-style tokens — match webb/app/globals.css usage of Inter
 const F = {
@@ -260,6 +261,7 @@ function AppContent() {
       <TopTicker />
 
       <View style={$.main}>
+        <Image source={LOGO} style={$.logo} resizeMode="contain" accessibilityIgnoresInvertColors />
         <Text style={$.wordmark}>Excuse Caddie</Text>
 
         <View style={$.counterRow}>
@@ -677,9 +679,14 @@ const $ = StyleSheet.create({
     width: '100%',
   },
 
+  logo: {
+    width: 64,
+    height: 64,
+    marginBottom: 10,
+  },
   wordmark: {
-    fontSize: 38,
-    lineHeight: 38,
+    fontSize: 36,
+    lineHeight: 36,
     color: PALETTE.cream,
     letterSpacing: -1.2,
     textAlign: 'center',
