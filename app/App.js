@@ -3,12 +3,20 @@ import {
   View, Text, Pressable, StyleSheet, Animated, Linking, Platform,
   AccessibilityInfo, Dimensions, Share,
 } from 'react-native';
-import Svg, { Path } from 'react-native-svg';
+import Svg, { Path, Defs, Filter, FeTurbulence, Rect, G } from 'react-native-svg';
 import { SafeAreaProvider, SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context';
 import { StatusBar } from 'expo-status-bar';
 import * as Haptics from 'expo-haptics';
 import * as Updates from 'expo-updates';
 import { Accelerometer } from 'expo-sensors';
+import {
+  useFonts,
+  Inter_400Regular,
+  Inter_500Medium,
+  Inter_600SemiBold,
+  Inter_700Bold,
+  Inter_800ExtraBold,
+} from '@expo-google-fonts/inter';
 
 import { CONFIG, PALETTE, CTA_FIRST, CTA_LABELS } from './src/constants';
 import { EXCUSES, getDailyExcuse } from './src/excuses';
@@ -19,6 +27,15 @@ import {
 } from './src/api';
 
 const { width: SCREEN_W } = Dimensions.get('window');
+
+// Type-style tokens — match webb/app/globals.css usage of Inter
+const F = {
+  regular: 'Inter_400Regular',
+  medium: 'Inter_500Medium',
+  semi: 'Inter_600SemiBold',
+  bold: 'Inter_700Bold',
+  extra: 'Inter_800ExtraBold',
+};
 
 function pickRandomLabel(prev) {
   if (CTA_LABELS.length <= 1) return CTA_LABELS[0];
@@ -51,6 +68,19 @@ class ErrorBoundary extends Component {
 }
 
 export default function App() {
+  const [fontsLoaded] = useFonts({
+    Inter_400Regular,
+    Inter_500Medium,
+    Inter_600SemiBold,
+    Inter_700Bold,
+    Inter_800ExtraBold,
+  });
+
+  if (!fontsLoaded) {
+    // Mirror the splash bg so there's no flash
+    return <View style={{ flex: 1, backgroundColor: PALETTE.fairway }} />;
+  }
+
   return (
     <ErrorBoundary>
       <SafeAreaProvider>
@@ -233,12 +263,16 @@ function AppContent() {
         <Text style={$.wordmark}>Excuse Caddie</Text>
 
         <View style={$.counterRow}>
-          <Text style={$.counterNum}>{(globalTotal ?? 0).toLocaleString('en-US')}</Text>
+          <CountUp value={globalTotal ?? 0} style={$.counterNum} duration={650} />
           <Text style={$.counterLabel}>ALIBIS ON THE CARD</Text>
         </View>
 
         <View style={$.panelWrap}>
           <View style={$.panel}>
+            {/* Cream paper grain overlay (matches webb's feTurbulence noise) */}
+            <View style={StyleSheet.absoluteFill} pointerEvents="none">
+              <PaperGrain />
+            </View>
             <Animated.Text
               key={genCount}
               style={[$.cardText, {
@@ -286,9 +320,54 @@ function AppContent() {
   );
 }
 
+// ── CountUp ────────────────────────────────────────────────────────────
+function CountUp({ value, duration = 650, style }) {
+  const [display, setDisplay] = useState(value);
+  const fromRef = useRef(value);
+  const startRef = useRef(0);
+  const rafRef = useRef(null);
+
+  useEffect(() => {
+    if (rafRef.current) cancelAnimationFrame(rafRef.current);
+    fromRef.current = display;
+    startRef.current = Date.now();
+
+    const tick = () => {
+      const elapsed = Date.now() - startRef.current;
+      const t = Math.min(1, elapsed / duration);
+      const eased = 1 - Math.pow(1 - t, 3); // ease-out cubic
+      const next = Math.round(fromRef.current + (value - fromRef.current) * eased);
+      setDisplay(next);
+      if (t < 1) rafRef.current = requestAnimationFrame(tick);
+    };
+    rafRef.current = requestAnimationFrame(tick);
+    return () => { if (rafRef.current) cancelAnimationFrame(rafRef.current); };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [value, duration]);
+
+  return <Text style={style}>{display.toLocaleString('en-US')}</Text>;
+}
+
+// ── PaperGrain (SVG noise overlay) ────────────────────────────────────
+function PaperGrain() {
+  return (
+    <Svg style={StyleSheet.absoluteFill} preserveAspectRatio="none" opacity={0.08}>
+      <Defs>
+        <Filter id="grain" x="0" y="0" width="100%" height="100%">
+          <FeTurbulence type="fractalNoise" baseFrequency="0.9" numOctaves="2" stitchTiles="stitch" />
+        </Filter>
+      </Defs>
+      <G>
+        <Rect width="100%" height="100%" fill="#000" filter="url(#grain)" />
+      </G>
+    </Svg>
+  );
+}
+
 // ── TopTicker ──────────────────────────────────────────────────────────
 function TopTicker() {
   const [items, setItems] = useState(null);
+  const [trackWidth, setTrackWidth] = useState(0);
   const translate = useRef(new Animated.Value(0)).current;
   const insets = useSafeAreaInsets();
 
@@ -298,25 +377,25 @@ function TopTicker() {
       .catch(() => setItems([]));
   }, []);
 
-  // Animate ticker — one full loop in 42s, matching the web
+  // Animate ticker once we know real width — duration scales with width to match
+  // the web's ~42s for full revolution feel (~22 px/sec).
   useEffect(() => {
-    if (!items || items.length === 0) return;
+    if (!items || items.length === 0 || trackWidth === 0) return;
     translate.setValue(0);
+    const duration = Math.max(8000, (trackWidth / 22) * 1000);
     const loop = Animated.loop(
       Animated.timing(translate, {
         toValue: 1,
-        duration: 42000,
+        duration,
         useNativeDriver: true,
       })
     );
     loop.start();
     return () => loop.stop();
-  }, [items, translate]);
-
-  const trackWidth = (items?.length ?? 0) * 220; // approx px per item (width measured below)
+  }, [items, trackWidth, translate]);
 
   return (
-    <View style={[$.ticker, { paddingTop: Math.max(0, insets.top * 0)}]}>
+    <View style={$.ticker}>
       {items === null ? (
         <Text style={$.tickerLoading}>Loading…</Text>
       ) : items.length === 0 ? (
@@ -339,17 +418,24 @@ function TopTicker() {
               },
             ]}
           >
-            {[...items, ...items].map((item, idx) => (
-              <View key={`${item.id}-${idx}`} style={$.tickerItem}>
-                <Text style={$.tickerRank}>#{(idx % items.length) + 1}</Text>
-                <Text style={$.tickerText} numberOfLines={1}>{item.text}</Text>
-                <View style={$.tickerVotes}>
-                  <ThumbsUpInline color="rgba(245,241,232,0.7)" size={10} />
-                  <Text style={$.tickerVoteNum}>{item.votes}</Text>
-                </View>
-                <Text style={$.tickerDot}>·</Text>
-              </View>
-            ))}
+            {/* First copy — measured */}
+            <View
+              style={$.tickerCopy}
+              onLayout={(e) => {
+                const w = e.nativeEvent.layout.width;
+                if (w && Math.abs(w - trackWidth) > 1) setTrackWidth(w);
+              }}
+            >
+              {items.map((item, idx) => (
+                <TickerItem key={`a-${item.id}-${idx}`} item={item} rank={idx + 1} />
+              ))}
+            </View>
+            {/* Second copy — invisible to onLayout, just for seamless loop */}
+            <View style={$.tickerCopy}>
+              {items.map((item, idx) => (
+                <TickerItem key={`b-${item.id}-${idx}`} item={item} rank={idx + 1} />
+              ))}
+            </View>
           </Animated.View>
         </View>
       )}
@@ -357,19 +443,37 @@ function TopTicker() {
   );
 }
 
+function TickerItem({ item, rank }) {
+  return (
+    <View style={$.tickerItem}>
+      <Text style={$.tickerRank}>#{rank}</Text>
+      <Text style={$.tickerText} numberOfLines={1}>{item.text}</Text>
+      <View style={$.tickerVotes}>
+        <ThumbsUpInline color="rgba(245,241,232,0.7)" size={10} />
+        <Text style={$.tickerVoteNum}>{item.votes}</Text>
+      </View>
+      <Text style={$.tickerDot}>·</Text>
+    </View>
+  );
+}
+
 // ── CTAButton ──────────────────────────────────────────────────────────
 function CTAButton({ label, onPress }) {
+  // Two-layer approach to fake CSS inset shadow: outer = darker base,
+  // inner = lighter on top, offset 3px → reveals dark "lip" at the bottom.
+  const [pressed, setPressed] = useState(false);
   return (
     <Pressable
       onPress={onPress}
-      style={({ pressed }) => [
-        $.cta,
-        pressed && $.ctaPressed,
-      ]}
+      onPressIn={() => setPressed(true)}
+      onPressOut={() => setPressed(false)}
+      style={$.ctaOuter}
       accessibilityRole="button"
       accessibilityLabel={label}
     >
-      <Text style={$.ctaLabel}>{label.toUpperCase()}</Text>
+      <View style={[$.ctaInner, pressed && $.ctaInnerPressed]}>
+        <Text style={$.ctaLabel}>{label.toUpperCase()}</Text>
+      </View>
     </Pressable>
   );
 }
@@ -442,7 +546,6 @@ function Footer() {
 
 // ── Helpers ────────────────────────────────────────────────────────────
 function mix(hex1, hex2, t) {
-  // Linear mix of two hex colors with weight t for hex1
   const a = hexToRgb(hex1), b = hexToRgb(hex2);
   const r = Math.round(a.r * t + b.r * (1 - t));
   const g = Math.round(a.g * t + b.g * (1 - t));
@@ -536,7 +639,7 @@ const $ = StyleSheet.create({
     paddingVertical: 8,
     alignItems: 'center',
   },
-  updateText: { fontSize: 13, color: '#fff', fontWeight: '600' },
+  updateText: { fontSize: 13, color: '#fff', fontWeight: '600', fontFamily: F.semi },
 
   // Top ticker
   ticker: {
@@ -549,16 +652,17 @@ const $ = StyleSheet.create({
     minHeight: 36,
     justifyContent: 'center',
   },
-  tickerLoading: { color: 'rgba(245,241,232,0.6)', fontSize: 11, textAlign: 'center' },
+  tickerLoading: { color: 'rgba(245,241,232,0.6)', fontSize: 11, textAlign: 'center', fontFamily: F.medium },
   tickerEmpty: { flexDirection: 'row', alignItems: 'center', gap: 6, justifyContent: 'center' },
-  tickerEmptyText: { color: 'rgba(245,241,232,0.75)', fontSize: 12, fontWeight: '500' },
+  tickerEmptyText: { color: 'rgba(245,241,232,0.75)', fontSize: 12, fontFamily: F.medium },
   tickerMask: { overflow: 'hidden' },
   tickerRow: { flexDirection: 'row', alignItems: 'center' },
+  tickerCopy: { flexDirection: 'row', alignItems: 'center' },
   tickerItem: { flexDirection: 'row', alignItems: 'center', gap: 8, paddingHorizontal: 10 },
-  tickerRank: { color: PALETTE.yellow, fontSize: 12, fontWeight: '700' },
-  tickerText: { color: 'rgba(245,241,232,0.95)', fontSize: 12, fontWeight: '500', maxWidth: 220 },
+  tickerRank: { color: PALETTE.yellow, fontSize: 12, fontFamily: F.bold },
+  tickerText: { color: 'rgba(245,241,232,0.95)', fontSize: 12, fontFamily: F.medium, maxWidth: 240 },
   tickerVotes: { flexDirection: 'row', alignItems: 'center', gap: 3 },
-  tickerVoteNum: { color: 'rgba(245,241,232,0.7)', fontSize: 12, fontVariant: ['tabular-nums'] },
+  tickerVoteNum: { color: 'rgba(245,241,232,0.7)', fontSize: 12, fontFamily: F.medium, fontVariant: ['tabular-nums'] },
   tickerDot: { color: 'rgba(245,241,232,0.2)', fontSize: 14, paddingHorizontal: 4 },
 
   // Main column
@@ -574,12 +678,12 @@ const $ = StyleSheet.create({
   },
 
   wordmark: {
-    fontSize: 36,
-    lineHeight: 36,
-    fontWeight: '800',
+    fontSize: 38,
+    lineHeight: 38,
     color: PALETTE.cream,
-    letterSpacing: -1.0,
+    letterSpacing: -1.2,
     textAlign: 'center',
+    fontFamily: F.extra,
   },
 
   counterRow: {
@@ -591,14 +695,14 @@ const $ = StyleSheet.create({
   counterNum: {
     color: PALETTE.yellow,
     fontSize: 18,
-    fontWeight: '700',
+    fontFamily: F.bold,
     fontVariant: ['tabular-nums'],
     letterSpacing: 0.2,
   },
   counterLabel: {
     color: 'rgba(245,241,232,0.55)',
     fontSize: 11,
-    fontWeight: '600',
+    fontFamily: F.semi,
     letterSpacing: 2.0,
   },
 
@@ -618,7 +722,7 @@ const $ = StyleSheet.create({
     justifyContent: 'center',
     borderWidth: 1,
     borderColor: 'rgba(26,25,22,0.10)',
-    // Stacked shadow approximating webb's box-shadow
+    overflow: 'hidden',
     shadowColor: '#000',
     shadowOffset: { width: 0, height: 8 },
     shadowOpacity: 0.22,
@@ -629,7 +733,7 @@ const $ = StyleSheet.create({
     color: PALETTE.ink,
     fontSize: 22,
     lineHeight: 30,
-    fontWeight: '700',
+    fontFamily: F.bold,
     textAlign: 'center',
     letterSpacing: -0.2,
   },
@@ -656,28 +760,36 @@ const $ = StyleSheet.create({
   },
   thumbPressed: { transform: [{ translateY: 2 }] },
 
-  // CTA
-  cta: {
+  // CTA — two-layer to fake the inset bottom shadow
+  ctaOuter: {
     marginTop: 22,
     width: '100%',
-    backgroundColor: PALETTE.yellow,
+    backgroundColor: PALETTE.yellowDark,
     borderRadius: 14,
-    paddingVertical: 16,
-    alignItems: 'center',
-    justifyContent: 'center',
     shadowColor: '#000',
     shadowOffset: { width: 0, height: 8 },
     shadowOpacity: 0.22,
     shadowRadius: 16,
     elevation: 10,
-    borderBottomWidth: 3,
-    borderBottomColor: PALETTE.yellowDark,
   },
-  ctaPressed: { transform: [{ translateY: 2 }], borderBottomWidth: 1 },
+  ctaInner: {
+    backgroundColor: PALETTE.yellow,
+    borderRadius: 14,
+    paddingVertical: 16,
+    paddingHorizontal: 20,
+    marginBottom: 3,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  ctaInnerPressed: {
+    marginBottom: 0,
+    marginTop: 3,
+    paddingVertical: 16,
+  },
   ctaLabel: {
     color: PALETTE.fairwayDeep,
     fontSize: 15,
-    fontWeight: '800',
+    fontFamily: F.extra,
     letterSpacing: 1.6,
   },
 
@@ -703,7 +815,7 @@ const $ = StyleSheet.create({
   },
   pillPressed: { transform: [{ translateY: 1 }], borderBottomWidth: 1 },
   pillInner: { flexDirection: 'row', alignItems: 'center', gap: 6 },
-  pillLabel: { color: '#fff', fontSize: 13, fontWeight: '700' },
+  pillLabel: { color: '#fff', fontSize: 13, fontFamily: F.bold },
 
   // Footer
   footer: {
@@ -715,6 +827,6 @@ const $ = StyleSheet.create({
     gap: 16,
   },
   footerLink: { flexDirection: 'row', alignItems: 'center', gap: 6 },
-  footerText: { color: 'rgba(245,241,232,0.85)', fontSize: 12, fontWeight: '700' },
+  footerText: { color: 'rgba(245,241,232,0.85)', fontSize: 12, fontFamily: F.bold },
   footerDot: { color: 'rgba(245,241,232,0.4)', fontSize: 14 },
 });
