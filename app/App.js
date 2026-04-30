@@ -249,17 +249,11 @@ function AppContent() {
   }, []);
 
   return (
-    <SafeAreaView style={$.root} edges={['top', 'left', 'right']}>
-      <StatusBar style="light" />
-
-      {updateAvailable && (
-        <Pressable onPress={doUpdate} disabled={updateDownloading} style={$.updateBanner}>
-          <Text style={$.updateText}>{updateDownloading ? 'Installing…' : 'Update available — tap to install'}</Text>
-        </Pressable>
-      )}
-
-      <TopTicker />
-
+    <AppShell
+      updateAvailable={updateAvailable}
+      updateDownloading={updateDownloading}
+      doUpdate={doUpdate}
+    >
       <View style={$.main}>
         <Image source={LOGO} style={$.logo} resizeMode="contain" accessibilityIgnoresInvertColors />
         <Text style={$.wordmark}>Excuse Caddie</Text>
@@ -318,7 +312,34 @@ function AppContent() {
       </View>
 
       <Footer />
-    </SafeAreaView>
+    </AppShell>
+  );
+}
+
+// ── AppShell ───────────────────────────────────────────────────────────
+// Wraps the screen so the dark fairway-deep band of the ticker extends
+// all the way up through the status bar / notch area.
+function AppShell({ children, updateAvailable, updateDownloading, doUpdate }) {
+  const insets = useSafeAreaInsets();
+  return (
+    <View style={$.root}>
+      <StatusBar style="light" />
+
+      <View style={[$.tickerWrap, { paddingTop: insets.top }]}>
+        {updateAvailable && (
+          <Pressable onPress={doUpdate} disabled={updateDownloading} style={$.updateBanner}>
+            <Text style={$.updateText}>
+              {updateDownloading ? 'Installing…' : 'Update available — tap to install'}
+            </Text>
+          </Pressable>
+        )}
+        <TopTicker />
+      </View>
+
+      <View style={[$.body, { paddingLeft: insets.left, paddingRight: insets.right }]}>
+        {children}
+      </View>
+    </View>
   );
 }
 
@@ -379,12 +400,11 @@ function TopTicker() {
       .catch(() => setItems([]));
   }, []);
 
-  // Animate ticker once we know real width — duration scales with width to match
-  // the web's ~42s for full revolution feel (~22 px/sec).
+  // Animate ticker once we know real width — ~65 px/sec (matches the web)
   useEffect(() => {
     if (!items || items.length === 0 || trackWidth === 0) return;
     translate.setValue(0);
-    const duration = Math.max(8000, (trackWidth / 22) * 1000);
+    const duration = Math.max(6000, (trackWidth / 65) * 1000);
     const loop = Animated.loop(
       Animated.timing(translate, {
         toValue: 1,
@@ -634,6 +654,12 @@ const $ = StyleSheet.create({
   root: {
     flex: 1,
     backgroundColor: PALETTE.fairway,
+  },
+  tickerWrap: {
+    backgroundColor: PALETTE.fairwayDeep,
+  },
+  body: {
+    flex: 1,
   },
 
   updateBanner: {
