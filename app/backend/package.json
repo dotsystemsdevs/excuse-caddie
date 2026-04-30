@@ -1,0 +1,12 @@
+{
+  "name": "bogey-blamer-backend",
+  "version": "1.0.0",
+  "private": true,
+  "scripts": {
+    "setup": "node setup.js"
+  },
+  "dependencies": {
+    "dotenv": "^17.3.1",
+    "pg": "^8.20.0"
+  }
+}

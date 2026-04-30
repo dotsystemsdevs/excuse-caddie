@@ -1,0 +1,50 @@
+# Dependencies
+node_modules/
+
+# Expo
+.expo/
+dist/
+web-build/
+expo-env.d.ts
+
+# Native
+.kotlin/
+*.orig.*
+*.jks
+*.p8
+*.p12
+*.key
+*.mobileprovision
+/ios
+/android
+
+# Metro
+.metro-health-check*
+
+# Debug & logs
+npm-debug.*
+yarn-debug.*
+yarn-error.*
+*.log
+npm-debug.log*
+
+# OS
+.DS_Store
+Thumbs.db
+*.pem
+
+# Env (no secrets in repo)
+.env
+.env.*
+!.env.example
+
+# TypeScript
+*.tsbuildinfo
+
+# Test / coverage (if added later)
+coverage/
+.nyc_output/
+
+# One-off source assets (not shipped)
+Gemini_Generated_Image*.png
+
