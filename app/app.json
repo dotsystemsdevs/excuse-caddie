@@ -19,7 +19,10 @@
       "config": {
         "usesNonExemptEncryption": false
       },
-      "buildNumber": "5"
+      "buildNumber": "5",
+      "infoPlist": {
+        "LSApplicationQueriesSchemes": ["instagram", "whatsapp"]
+      }
     },
     "android": {
       "adaptiveIcon": {

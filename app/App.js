@@ -10,6 +10,7 @@ import * as Haptics from 'expo-haptics';
 import * as Updates from 'expo-updates';
 import { Accelerometer } from 'expo-sensors';
 import * as WebBrowser from 'expo-web-browser';
+import * as Clipboard from 'expo-clipboard';
 import {
   useFonts,
   Inter_400Regular,
@@ -243,6 +244,29 @@ function AppContent() {
     }
   }, [haptic]);
 
+  // Instagram has no public web share intent — best UX is copy text+URL
+  // to clipboard, then deep-link into the IG app so user can paste into
+  // a story or post. Falls back to instagram.com if the app isn't installed.
+  const handleInstagramShare = useCallback(async () => {
+    if (copyTimeout.current) clearTimeout(copyTimeout.current);
+    haptic('light');
+    try {
+      await Clipboard.setStringAsync(`"${cardText}" — Excuse Caddie ${shareUrl}`);
+    } catch {}
+    setCopied(true);
+    copyTimeout.current = setTimeout(() => setCopied(false), CONFIG.COPY_RESET_MS);
+    try {
+      const can = await Linking.canOpenURL('instagram://app');
+      if (can) {
+        await Linking.openURL('instagram://app');
+      } else {
+        await Linking.openURL('https://instagram.com');
+      }
+    } catch {
+      Linking.openURL('https://instagram.com').catch(() => {});
+    }
+  }, [cardText, shareUrl, haptic]);
+
   // Platform-specific native share — iOS treats {url, message} as TWO items
   // (some receivers render both = duplicate URL), so we pass only `url` on
   // iOS (sheet auto-builds a rich preview from the page's OG tags) and let
@@ -326,16 +350,15 @@ function AppContent() {
           <SharePill bg={PALETTE.orange} label="Reddit" icon={<RedditIcon />} onPress={() => openShareIntent(redditUrl)} />
           <SharePill bg={PALETTE.black} label="X" icon={<XIcon />} onPress={() => openShareIntent(xUrl)} />
           <SharePill bg={PALETTE.blue} label="Facebook" icon={<FbIcon />} onPress={() => openShareIntent(fbUrl)} />
+          <SharePill bg={PALETTE.instagram} label="Instagram" icon={<InstagramIcon />} onPress={handleInstagramShare} />
           <SharePill
             bg={PALETTE.red}
-            label={copied ? 'Pocketed' : 'Share'}
+            label={copied ? 'Copied' : 'Share'}
             icon={copied ? <CheckIcon /> : <ShareIcon />}
             onPress={handleNativeShare}
           />
         </View>
       </View>
-
-      <Footer />
     </AppShell>
   );
 }
@@ -572,24 +595,6 @@ function SharePill({ bg, label, icon, onPress }) {
   );
 }
 
-// ── Footer ─────────────────────────────────────────────────────────────
-function Footer() {
-  const insets = useSafeAreaInsets();
-  return (
-    <View style={[$.footer, { paddingBottom: Math.max(insets.bottom, 12) }]}>
-      <Pressable onPress={() => Linking.openURL(CONFIG.GITHUB_URL).catch(() => {})} style={$.footerLink}>
-        <GitHubIcon />
-        <Text style={$.footerText}>GitHub</Text>
-      </Pressable>
-      <Text style={$.footerDot}>·</Text>
-      <Pressable onPress={() => Linking.openURL(CONFIG.BMC_URL).catch(() => {})} style={$.footerLink}>
-        <CoffeeIcon />
-        <Text style={[$.footerText, { color: PALETTE.yellow }]}>Tip the caddie</Text>
-      </Pressable>
-    </View>
-  );
-}
-
 // ── Helpers ────────────────────────────────────────────────────────────
 function mix(hex1, hex2, t) {
   const a = hexToRgb(hex1), b = hexToRgb(hex2);
@@ -652,6 +657,20 @@ function CheckIcon() {
   return (
     <Svg width={13} height={13} viewBox="0 0 24 24">
       <Path d="M20 6L9 17l-5-5" stroke="#fff" strokeWidth={3} strokeLinecap="round" strokeLinejoin="round" fill="none" />
+    </Svg>
+  );
+}
+function InstagramIcon() {
+  return (
+    <Svg width={14} height={14} viewBox="0 0 24 24">
+      <Path
+        fill="none"
+        stroke="#fff"
+        strokeWidth={2}
+        strokeLinecap="round"
+        strokeLinejoin="round"
+        d="M7 2h10a5 5 0 0 1 5 5v10a5 5 0 0 1-5 5H7a5 5 0 0 1-5-5V7a5 5 0 0 1 5-5zm9 4.5a1 1 0 1 0 0 2 1 1 0 0 0 0-2zM12 8a4 4 0 1 1 0 8 4 4 0 0 1 0-8z"
+      />
     </Svg>
   );
 }

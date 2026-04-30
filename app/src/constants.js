@@ -37,6 +37,8 @@ export const PALETTE = {
   panelCream: '#F2EBDB',
   ink: '#1A1916',
   orange: '#FF4500',
+  instagram: '#E1306C',
+  whatsapp: '#25D366',
 };
 
 export const CTA_FIRST = 'Take the Mulligan';
