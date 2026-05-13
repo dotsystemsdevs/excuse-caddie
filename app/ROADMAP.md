@@ -1,91 +1,51 @@
-# Roadmap
+# App Roadmap
 
-**Aktuell version:** `v1.0.0` · **Nästa planerade:** `v1.1.0`
+Loose backlog for the Excuse Caddie native app (`app/`). The website roadmap lives in [`../webb/ROADMAP.md`](../webb/ROADMAP.md). Nothing here is committed — open an issue or PR to push something forward.
 
-**Var version sätts:** `app.json` (expo.version), `package.json` (version), `app.json` (android.versionCode endast för Android).
-
----
-
-## Released
-
-### v1.0.0 — Feb 2026
-
-Första release (App Store & Google Play).
-
-| Ändring | Typ |
-|--------|------|
-| Slumpmässig golfursäkt från 150+ alternativ | Feature |
-| Kopiera till urklipp med "Copied!"-feedback | Feature |
-| Uppmaning att betygsätta efter 3 genereringar | Feature |
-| In-app uppdateringskontroll (Expo Updates) med reload-banner | Feature |
-| Länkar till Privacy & Terms i sidfot (app-legal-docs) | Legal |
-| VoiceOver / TalkBack och reduce-motion | Polish |
-| EAS Build (iOS bundleIdentifier, Android package) | Build |
-| 100 % offline — inga konton, ingen spårning | Privacy |
+**Current version:** `1.5.0` (build 6 / versionCode 7)
+**Version source of truth:** [`app.json`](app.json) (`expo.version`, `ios.buildNumber`, `android.versionCode`) and [`package.json`](package.json).
 
 ---
 
-## Bugs
+## Recently shipped (1.5.0)
 
-| Bug | Prioritet | Status |
-|-----|-----------|--------|
-| *(inga öppna)* | — | — |
+- Renamed from "Bogey Blamer" to **Excuse Caddie: Golf Alibis** across app, App Store, and Play Store listings
+- New logo + app icon (flattened on fairway-green for App Store)
+- Sound on every Mulligan tap (10 bundled clips, picks one at random)
+- On-device share card capture (`react-native-view-shot`) — replaces the old web-hosted PNG fetch, so sharing now works fully offline
+- Tightened home layout — logo + wordmark anchored near the top, less floating vertical air
+- Single Share button replaces the per-app share pills
+- Two new excuses added (now 416 total)
+- App Store + Play Store listings rewritten with ASO-optimized copy
 
----
+## Next up (1.5.1)
 
-## Build-checklista (före varje release)
+| Item | Why | Notes |
+|------|-----|-------|
+| In-app review prompt | 10x more reviews than organic asks | Use `expo-store-review`. Trigger after ~5 Mulligan taps. Only once per user (the OS rate-limits). |
+| Verify share-card text rendering on Android | The new `react-native-view-shot` capture may render fonts slightly differently across devices | Smoke test on a few real Android phones |
+| Audit unused dependencies | `expo-web-browser` and `expo-application` look unused | Light KB savings, cleaner manifest |
 
-**iOS:** Gå igenom [IOS_APP_STORE_CHECKLIST.md](IOS_APP_STORE_CHECKLIST.md) innan submission.
+## Soon
 
-1. **Höj version** i `app.json` och `package.json` (t.ex. 1.0.0 → 1.1.0).
-2. **Android:** Sätt `android.versionCode` i `app.json` till ett högre heltal än föregående release.
-3. **Kör:** `npx expo-doctor` och åtgärda eventuella fel.
-4. **Bygg:** `eas build --platform all --profile production`
-5. **Ladda upp:** Till App Store Connect (iOS) och Google Play Console (Android), eller använd `eas submit`.
+| Item | Why |
+|------|-----|
+| Settings screen | One toggle: mute the Mulligan sound. Currently the sound is unconditional. |
+| Localization (Swedish) | The webb is English-only — the app could match or test SV first |
+| Better empty/error states for the leaderboard ticker | Currently shows "Be the first to vote" — could be more personality |
+| Onboarding card on first launch | One-card explainer of shake-to-generate (most-missed feature) |
 
-**Aktuellt versionCode (Android):** `1` (v1.0.0)
+## Maybe
 
----
+| Item | Notes |
+|------|-------|
+| Daily push notification | "Today's alibi is ready" — high-impact but adds permission friction. Skip unless retention metrics demand it. |
+| Widget (iOS / Android) | Excuse-of-the-day on the home screen. Cool but extra binary surface to maintain. |
+| Apple Watch companion | Tap from the wrist on the tee. Cute, probably overkill. |
+| Haptic patterns per excuse category | Different vibration for "Body" vs "Weather" excuses. Tiny moment of delight. |
 
-## Planerat — v1.1.0
+## Out of scope
 
-| Feature | Prioritet | Typ |
-|---------|-----------|------|
-| *(TBD)* | — | — |
-
----
-
-## Community Requests — v1.1.0+
-
-Önskemål från användare. Nice to have.
-
-| Feature | Prioritet | Typ | Källa |
-|---------|-----------|-----|--------|
-| *(inga än)* | — | — | — |
-
----
-
-## Framtida idéer
-
-| Idé | Prioritet | Notering |
-|-----|-----------|----------|
-| Fler kategorier/teman för ursäkter | P3 | Mer innehåll |
-| Dela ursäkt som bild / socialt kort | P3 | Delning |
-| Lokalisering (t.ex. svenska) | P3 | Större reach |
-| Valfri ljud/haptik vid generering | P3 | Polish |
-
----
-
-## Community Highlights
-
-*(Citat från användare efter release.)*
-
----
-
-## Prioritetsguide
-
-| Nivå | Betydelse |
-|------|-----------|
-| **P1** | Kritisk — fixa före nästa release |
-| **P2** | Viktig — sikta på aktuell milstolpe |
-| **P3** | Nice to have — framtida backlog |
+- User accounts or auth — the no-account vibe is part of the product
+- In-app purchases or subscriptions — the app is and stays free
+- Cross-app tracking or analytics SDKs beyond the minimal device-ID + interaction counts already declared in App Privacy
