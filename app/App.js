@@ -12,6 +12,7 @@ import { Accelerometer } from 'expo-sensors';
 import * as Clipboard from 'expo-clipboard';
 import * as FileSystem from 'expo-file-system';
 import * as Sharing from 'expo-sharing';
+import { captureRef } from 'react-native-view-shot';
 import {
   useFonts,
   Inter_400Regular,
@@ -28,9 +29,11 @@ import { getExcuseId } from './src/excuse-ids';
 import {
   fetchGeneratedTotal, trackGenerated, voteForExcuse, fetchLeaderboard,
 } from './src/api';
+import { playSplash } from './src/sounds';
 
 const { width: SCREEN_W } = Dimensions.get('window');
 const LOGO = require('./assets/logo.png');
+const LEGAL_BASE_URL = 'https://dotsystemsdevs.github.io/app-legal-docs/app-golfexcuse';
 
 // Type-style tokens — match webb/app/globals.css usage of Inter
 const F = {
@@ -114,6 +117,7 @@ function AppContent() {
   const thumbUpScale = useRef(new Animated.Value(1)).current;
   const thumbDnScale = useRef(new Animated.Value(1)).current;
   const copyTimeout = useRef(null);
+  const storyCardRef = useRef(null);
 
   const cardText = excuse || dailyExcuse.text;
 
@@ -151,6 +155,7 @@ function AppContent() {
 
   const handleGenerate = useCallback(() => {
     haptic('medium');
+    playSplash();
     if (!reduceMotion) {
       Animated.parallel([
         Animated.timing(cardOpacity, { toValue: 0.0, duration: 90, useNativeDriver: true }),
@@ -223,47 +228,43 @@ function AppContent() {
   const excuseNumber = getExcuseNumber(cardText);
   const shareUrl = excuseNumber ? `${CONFIG.WEB_URL}/${excuseNumber}` : CONFIG.WEB_URL;
 
-  // Download the excuse image once per excuse (cached on device) so
-  // every subsequent share-tap is instant. Returns a local file:// URI
-  // that share intents accept as an image attachment.
-  const ensureLocalImage = useCallback(async (variant /* 'og' | 'square' */) => {
-    if (!excuseNumber) return null;
-    const path = variant === 'square' ? 'share-image' : 'opengraph-image';
-    const remoteUrl = `${CONFIG.WEB_URL}/${excuseNumber}/${path}`;
-    const fileName = `excuse-${excuseNumber}-${variant}.png`;
-    const fileUri = `${FileSystem.cacheDirectory}${fileName}`;
+  // Capture the off-screen StoryShareCard view as a 1080×1920 PNG on
+  // device. Works offline — no network roundtrip, no webb dependency.
+  const captureStoryImage = useCallback(async () => {
+    if (!storyCardRef.current) return null;
     try {
-      const info = await FileSystem.getInfoAsync(fileUri);
-      if (info.exists && info.size > 1000) return fileUri;
-      const { uri } = await FileSystem.downloadAsync(remoteUrl, fileUri);
+      const uri = await captureRef(storyCardRef, {
+        format: 'png',
+        quality: 1.0,
+        result: 'tmpfile',
+        width: 1080,
+        height: 1350,
+      });
       return uri;
     } catch {
       return null;
     }
-  }, [excuseNumber]);
+  }, []);
 
-  // Single share entry point. Downloads the 1080×1080 square share
-  // image (works for both Stories and Feed posts on Instagram + still
-  // looks clean as a link preview in iMessage / X / Facebook / etc.)
-  // and routes through the system share sheet — the user picks the
-  // destination from there. URL goes on the clipboard so apps that
-  // can only ingest one item still let the user paste the link.
+  // Single share entry point. Captures a 1080×1920 story-format PNG
+  // from the hidden StoryShareCard view and routes through the system
+  // share sheet — the user picks the destination from there. URL goes
+  // on the clipboard so apps that can only ingest one item still let
+  // the user paste the link.
   const handleShare = useCallback(async () => {
     if (copyTimeout.current) clearTimeout(copyTimeout.current);
     haptic('light');
     const text = `"${cardText}" — Excuse Caddie\n${shareUrl}`;
     try { await Clipboard.setStringAsync(text); } catch {}
 
-    const fileUri = await ensureLocalImage('square');
+    const fileUri = await captureStoryImage();
     setCopied(true);
     copyTimeout.current = setTimeout(() => setCopied(false), CONFIG.COPY_RESET_MS);
 
     try {
       if (Platform.OS === 'ios' && fileUri) {
         // iOS treats {url, message} as two distinct activity items —
-        // the receiving app picks what it wants (image-capable apps
-        // get both, text-only apps get the message). The url field
-        // accepts a local file:// path for image attachments.
+        // image-capable apps get both, text-only apps get the message.
         await Share.share({ url: fileUri, message: text });
         return;
       }
@@ -277,11 +278,11 @@ function AppContent() {
         });
         return;
       }
-      // Image download failed — text-only share so the button never
-      // feels broken (e.g. on flaky networks).
+      // Capture failed — text-only fallback so the button never feels
+      // broken.
       await Share.share({ message: text });
     } catch {}
-  }, [cardText, shareUrl, haptic, ensureLocalImage]);
+  }, [cardText, shareUrl, haptic, captureStoryImage]);
 
   const doUpdate = useCallback(async () => {
     setUpdateDownloading(true);
@@ -298,11 +299,6 @@ function AppContent() {
       <View style={$.main}>
         <Image source={LOGO} style={$.logo} resizeMode="contain" accessibilityIgnoresInvertColors />
         <Text style={$.wordmark}>Excuse Caddie</Text>
-
-        <View style={$.counterRow}>
-          <CountUp value={globalTotal ?? 0} style={$.counterNum} duration={650} />
-          <Text style={$.counterLabel}>ALIBIS ON THE CARD</Text>
-        </View>
 
         <View style={$.panelWrap}>
           <View style={$.panel}>
@@ -337,16 +333,48 @@ function AppContent() {
           </View>
         </View>
 
+        <View style={$.counterRow}>
+          <CountUp value={globalTotal ?? 0} style={$.counterNum} duration={650} />
+          <Text style={$.counterLabel}>ALIBIS ON THE CARD</Text>
+        </View>
+
         <CTAButton label={ctaLabel} onPress={handleGenerate} />
 
         <View style={$.shareRow}>
           <SharePill
             bg={PALETTE.red}
-            label={copied ? 'Shared' : 'Share this ruling'}
+            label={copied ? 'Shared' : 'Share'}
             icon={copied ? <CheckIcon /> : <ShareIcon />}
             onPress={handleShare}
           />
         </View>
+
+        <View style={$.footer}>
+          <Pressable
+            onPress={() => Linking.openURL(`${LEGAL_BASE_URL}/privacy.html`)}
+            hitSlop={10}
+            accessibilityRole="link"
+            accessibilityLabel="Privacy Policy"
+          >
+            <Text style={$.footerText}>Privacy</Text>
+          </Pressable>
+          <Text style={$.footerDot}>·</Text>
+          <Pressable
+            onPress={() => Linking.openURL(`${LEGAL_BASE_URL}/terms.html`)}
+            hitSlop={10}
+            accessibilityRole="link"
+            accessibilityLabel="Terms of Service"
+          >
+            <Text style={$.footerText}>Terms</Text>
+          </Pressable>
+        </View>
+
+        {/* Off-screen card used by Share — captured at 1080×1920. */}
+        <StoryShareCard
+          viewRef={storyCardRef}
+          text={cardText}
+          count={globalTotal ?? 0}
+        />
       </View>
     </AppShell>
   );
@@ -440,7 +468,7 @@ function TopTicker() {
   useEffect(() => {
     if (!items || items.length === 0 || trackWidth === 0) return;
     translate.setValue(0);
-    const duration = Math.max(6000, (trackWidth / 65) * 1000);
+    const duration = Math.max(6000, (trackWidth / 35) * 1000);
     const loop = Animated.loop(
       Animated.timing(translate, {
         toValue: 1,
@@ -557,7 +585,7 @@ function ThumbButton({ direction, active, scale, onPress }) {
       ]}
     >
       <Animated.View style={{ transform: [{ scale }, { rotate: isUp ? '0deg' : '180deg' }] }}>
-        <ThumbIcon color={fg} />
+        <ThumbIcon color={fg} size={20} />
       </Animated.View>
     </Pressable>
   );
@@ -583,6 +611,206 @@ function SharePill({ bg, label, icon, onPress }) {
     </Pressable>
   );
 }
+
+// ── StoryShareCard ─────────────────────────────────────────────────────
+// Off-screen view that the Share button captures as a 1080×1920 PNG.
+// Mirrors the app's home screen — same colors, fonts, proportions —
+// just stretched to 9:16 so it feels like a screenshot of the app.
+function StoryShareCard({ viewRef, text, count }) {
+  return (
+    <View ref={viewRef} collapsable={false} style={story.frame}>
+      {/* Main column — reuses the app's hierarchy */}
+      <View style={story.main}>
+        <Image source={LOGO} style={story.logo} resizeMode="contain" />
+        <Text style={story.wordmark}>Excuse Caddie</Text>
+
+        <View style={story.panelWrap}>
+          <View style={story.panel}>
+            <View style={StyleSheet.absoluteFill} pointerEvents="none">
+              <PaperGrain />
+            </View>
+            <Text style={story.cardText}>{text}</Text>
+          </View>
+        </View>
+
+        <View style={story.counterRow}>
+          <Text style={story.counterNum}>{count.toLocaleString('en-US')}</Text>
+          <Text style={story.counterLabel}>ALIBIS ON THE CARD</Text>
+        </View>
+      </View>
+
+      {/* App-store badges — brutalist style like the Mulligan CTA */}
+      <View style={story.storesRow}>
+        <View style={story.storeOuter}>
+          <View style={story.storeInner}>
+            <AppleLogo color={PALETTE.fairwayDeep} />
+            <View>
+              <Text style={story.storeKicker}>Download on the</Text>
+              <Text style={story.storeName}>App Store</Text>
+            </View>
+          </View>
+        </View>
+        <View style={story.storeOuter}>
+          <View style={story.storeInner}>
+            <PlayLogo color={PALETTE.fairwayDeep} />
+            <View>
+              <Text style={story.storeKicker}>GET IT ON</Text>
+              <Text style={story.storeName}>Google Play</Text>
+            </View>
+          </View>
+        </View>
+      </View>
+    </View>
+  );
+}
+
+function AppleLogo({ color = '#fff' }) {
+  return (
+    <Svg width={24} height={24} viewBox="0 0 24 24">
+      <Path
+        fill={color}
+        d="M17.05 20.28c-.98.95-2.05.86-3.08.4-1.09-.47-2.09-.48-3.24 0-1.44.62-2.2.44-3.06-.4C2.79 15.25 3.51 7.59 9.05 7.31c1.35.07 2.29.74 3.08.8 1.18-.24 2.31-.93 3.57-.84 1.51.12 2.65.72 3.4 1.8-3.12 1.87-2.38 5.98.48 7.13-.57 1.5-1.31 2.99-2.54 4.09zM12.03 7.25c-.15-2.23 1.66-4.07 3.74-4.25.29 2.58-2.34 4.5-3.74 4.25z"
+      />
+    </Svg>
+  );
+}
+
+function PlayLogo({ color = '#fff' }) {
+  return (
+    <Svg width={24} height={24} viewBox="0 0 24 24">
+      <Path fill={color} d="M5 3.5v17l13.5-8.5z" />
+    </Svg>
+  );
+}
+
+const story = StyleSheet.create({
+  // 4:5 portrait — Instagram's current recommended feed-post size.
+  // Logical 540×675 → captured as 1080×1350 PNG.
+  frame: {
+    position: 'absolute',
+    left: -10000,
+    top: 0,
+    width: 540,
+    height: 675,
+    backgroundColor: PALETTE.fairway,
+  },
+  main: {
+    flex: 1,
+    paddingHorizontal: 32,
+    paddingTop: 68,
+    paddingBottom: 110,
+    alignItems: 'center',
+    justifyContent: 'flex-start',
+  },
+  logo: {
+    width: 92,
+    height: 92,
+    marginBottom: 14,
+  },
+  wordmark: {
+    fontSize: 52,
+    lineHeight: 52,
+    color: PALETTE.cream,
+    letterSpacing: -1.6,
+    textAlign: 'center',
+    fontFamily: F.extra,
+  },
+  panelWrap: {
+    width: '100%',
+    marginTop: 28,
+    position: 'relative',
+  },
+  panel: {
+    width: '100%',
+    backgroundColor: PALETTE.panelCream,
+    borderRadius: 22,
+    paddingHorizontal: 36,
+    paddingVertical: 48,
+    minHeight: 220,
+    alignItems: 'center',
+    justifyContent: 'center',
+    borderWidth: 1,
+    borderColor: 'rgba(26,25,22,0.10)',
+    overflow: 'hidden',
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 14 },
+    shadowOpacity: 0.28,
+    shadowRadius: 22,
+    elevation: 12,
+  },
+  cardText: {
+    color: PALETTE.ink,
+    fontSize: 34,
+    lineHeight: 42,
+    fontFamily: F.bold,
+    textAlign: 'center',
+    letterSpacing: -0.4,
+  },
+  counterRow: {
+    marginTop: 24,
+    flexDirection: 'row',
+    alignItems: 'baseline',
+    gap: 10,
+  },
+  counterNum: {
+    color: PALETTE.yellow,
+    fontSize: 30,
+    fontFamily: F.bold,
+    fontVariant: ['tabular-nums'],
+    letterSpacing: 0.2,
+  },
+  counterLabel: {
+    color: 'rgba(245,241,232,0.65)',
+    fontSize: 15,
+    fontFamily: F.semi,
+    letterSpacing: 2.6,
+  },
+  storesRow: {
+    position: 'absolute',
+    bottom: 22,
+    left: 0,
+    right: 0,
+    flexDirection: 'row',
+    justifyContent: 'center',
+    gap: 12,
+  },
+  // Two-layer brutalist button — outer is darker base, inner sits 3px
+  // above to reveal the bottom "lip". Mirrors the Mulligan CTA.
+  storeOuter: {
+    backgroundColor: PALETTE.yellowDark,
+    borderRadius: 12,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 6 },
+    shadowOpacity: 0.22,
+    shadowRadius: 10,
+    elevation: 8,
+  },
+  storeInner: {
+    backgroundColor: PALETTE.yellow,
+    borderRadius: 12,
+    paddingHorizontal: 18,
+    paddingVertical: 12,
+    marginBottom: 4,
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 10,
+  },
+  storeKicker: {
+    fontSize: 10,
+    fontFamily: F.semi,
+    color: PALETTE.fairwayDeep,
+    opacity: 0.75,
+    letterSpacing: 0.5,
+    lineHeight: 12,
+  },
+  storeName: {
+    fontSize: 17,
+    fontFamily: F.extra,
+    color: PALETTE.fairwayDeep,
+    letterSpacing: -0.3,
+    lineHeight: 20,
+  },
+});
 
 // ── Helpers ────────────────────────────────────────────────────────────
 function mix(hex1, hex2, t) {
@@ -677,7 +905,8 @@ const $ = StyleSheet.create({
   main: {
     flex: 1,
     paddingHorizontal: 20,
-    paddingTop: 28,
+    paddingTop: 64,
+    paddingBottom: 28,
     alignItems: 'center',
     justifyContent: 'flex-start',
     maxWidth: 640,
@@ -688,7 +917,7 @@ const $ = StyleSheet.create({
   logo: {
     width: 56,
     height: 56,
-    marginBottom: 8,
+    marginBottom: 12,
   },
   wordmark: {
     fontSize: 34,
@@ -700,7 +929,7 @@ const $ = StyleSheet.create({
   },
 
   counterRow: {
-    marginTop: 10,
+    marginTop: 18,
     flexDirection: 'row',
     alignItems: 'baseline',
     gap: 8,
@@ -714,7 +943,7 @@ const $ = StyleSheet.create({
   },
   counterLabel: {
     color: 'rgba(245,241,232,0.55)',
-    fontSize: 11,
+    fontSize: 12,
     fontFamily: F.semi,
     letterSpacing: 2.0,
   },
@@ -722,7 +951,7 @@ const $ = StyleSheet.create({
   // Excuse panel
   panelWrap: {
     width: '100%',
-    marginTop: 18,
+    marginTop: 28,
     position: 'relative',
   },
   panel: {
@@ -759,9 +988,9 @@ const $ = StyleSheet.create({
     gap: 8,
   },
   thumb: {
-    width: 38,
-    height: 38,
-    borderRadius: 19,
+    width: 48,
+    height: 48,
+    borderRadius: 24,
     alignItems: 'center',
     justifyContent: 'center',
     borderWidth: 1,
@@ -775,7 +1004,7 @@ const $ = StyleSheet.create({
 
   // CTA — two-layer to fake the inset bottom shadow
   ctaOuter: {
-    marginTop: 18,
+    marginTop: 'auto',
     width: '100%',
     backgroundColor: PALETTE.yellowDark,
     borderRadius: 14,
@@ -788,7 +1017,7 @@ const $ = StyleSheet.create({
   ctaInner: {
     backgroundColor: PALETTE.yellow,
     borderRadius: 14,
-    paddingVertical: 16,
+    paddingVertical: 18,
     paddingHorizontal: 20,
     marginBottom: 3,
     alignItems: 'center',
@@ -797,26 +1026,26 @@ const $ = StyleSheet.create({
   ctaInnerPressed: {
     marginBottom: 0,
     marginTop: 3,
-    paddingVertical: 16,
+    paddingVertical: 18,
   },
   ctaLabel: {
     color: PALETTE.fairwayDeep,
-    fontSize: 15,
+    fontSize: 16,
     fontFamily: F.extra,
     letterSpacing: 1.6,
   },
 
   // Share row
   shareRow: {
-    marginTop: 16,
+    marginTop: 12,
     flexDirection: 'row',
     flexWrap: 'wrap',
     justifyContent: 'center',
     gap: 8,
   },
   pill: {
-    paddingHorizontal: 16,
-    paddingVertical: 10,
+    paddingHorizontal: 24,
+    paddingVertical: 16,
     borderRadius: 14,
     shadowColor: '#000',
     shadowOffset: { width: 0, height: 4 },
@@ -828,7 +1057,7 @@ const $ = StyleSheet.create({
   },
   pillPressed: { transform: [{ translateY: 1 }], borderBottomWidth: 1 },
   pillInner: { flexDirection: 'row', alignItems: 'center', gap: 6 },
-  pillLabel: { color: '#fff', fontSize: 13, fontFamily: F.bold },
+  pillLabel: { color: '#fff', fontSize: 14, fontFamily: F.bold },
 
   // Footer
   footer: {

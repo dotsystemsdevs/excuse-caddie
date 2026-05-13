@@ -1,5 +1,5 @@
 -- ============================================================
--- Bogey Blamer — Supabase Schema
+-- Excuse Caddie — Supabase Schema
 -- Run this in Supabase SQL Editor (Dashboard → SQL Editor → New query)
 -- ============================================================
 

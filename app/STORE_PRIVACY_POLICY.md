@@ -14,7 +14,7 @@ https://dotsystemsdevs.github.io/app-legal-docs/app-golfexcuse/privacy.html
 
 ### Google Play Console
 
-1. Öppna [Google Play Console](https://play.google.com/console) → din app **Bogey Blamer**.
+1. Öppna [Google Play Console](https://play.google.com/console) → din app **Excuse Caddie**.
 2. Gå till **Policy** → **App content** (eller **App content** i menyn).
 3. Hitta **Privacy policy** och klicka **Start** eller **Manage**.
 4. Välj **Enter URL** och klistra in:
@@ -27,7 +27,7 @@ https://dotsystemsdevs.github.io/app-legal-docs/app-golfexcuse/privacy.html
 
 ### App Store Connect (Apple)
 
-1. Öppna [App Store Connect](https://appstoreconnect.apple.com) → **My Apps** → **Bogey Blamer**.
+1. Öppna [App Store Connect](https://appstoreconnect.apple.com) → **My Apps** → **Excuse Caddie**.
 2. Välj appen → **App Information** (under General).
 3. I **Privacy Policy URL** klistra in:
    `https://dotsystemsdevs.github.io/app-legal-docs/app-golfexcuse/privacy.html`

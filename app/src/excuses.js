@@ -288,6 +288,8 @@ export const EXCUSES = [
   { text: "Something's wrong with this club", tags: ['equipment'] },
   { text: "I didn't account for the Coriolis effect.", tags: ['bad_luck'] },
   { text: "Still figuring these clubs out", tags: ['equipment'] },
+  { text: "Forgot to breathe on the backswing.", tags: ['mental'] },
+  { text: "Just scouting the next hole.", tags: ['distraction'] },
 ];
 
 export const EXCUSE_COUNT = EXCUSES.length;

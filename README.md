@@ -5,9 +5,10 @@ A quiet alibi service for the modern golfer. Two surfaces, one excuse pool.
 ## Repo layout
 
 - **[`webb/`](webb/)** — Next.js 15 website live at [excusecaddie.xyz](https://excusecaddie.xyz)
-- **[`app/`](app/)** — React Native / Expo phone app (Bogey Blamer / Golf Excuse Generator)
+- **[`app/`](app/)** — React Native / Expo phone app (Excuse Caddie: Golf Alibis)
+- **[`design/`](design/)** — Source logo, App Store / Play Store screenshots, and design references (not shipped)
 
-Each folder is its own self-contained project with its own `package.json`, README, and tooling. Run `npm install` and the project's dev command inside whichever one you're working on.
+Each project folder is self-contained with its own `package.json`, README, and tooling. Run `npm install` and the project's dev command inside whichever one you're working on.
 
 ## Web (`webb/`)
 

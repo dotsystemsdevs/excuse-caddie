@@ -1,8 +1,8 @@
 <p align="center">
-  <img src="assets/logo.png" alt="Bogey Blamer" width="120" height="120" />
+  <img src="assets/logo.png" alt="Excuse Caddie" width="120" height="120" />
 </p>
 
-<h1 align="center">Bogey Blamer</h1>
+<h1 align="center">Excuse Caddie</h1>
 
 <p align="center">
   <strong>Bad shot? Blame everything but yourself.</strong><br/>
