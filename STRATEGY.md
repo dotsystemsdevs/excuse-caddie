@@ -15,7 +15,7 @@ For the day-to-day backlog see [`app/ROADMAP.md`](app/ROADMAP.md) and [`webb/ROA
 | Website | live | [excusecaddie.xyz](https://excusecaddie.xyz), Next 16 |
 | Backend | live | Supabase + Redis (voting, leaderboard, generated counter) |
 
-**Shipped in 1.5.0:** rebrand to Excuse Caddie, sounds on Mulligan, on-device share card (works offline), tighter home layout, 416 excuses, ASO-optimized store listings, new logo, all dependabot advisories cleared.
+**Shipped in 1.5.0:** rebrand to Excuse Caddie, sounds on Mulligan, on-device share card (works offline), tighter home layout, 270 excuses, ASO-optimized store listings, new logo, all dependabot advisories cleared.
 
 ---
 
@@ -23,7 +23,7 @@ For the day-to-day backlog see [`app/ROADMAP.md`](app/ROADMAP.md) and [`webb/ROA
 
 ### What's in good shape ✅
 
-- **Single excuse pool, two surfaces.** Same 416 excuses power the website and the app. Source of truth lives in both `webb/lib/excuses.js` and `app/src/excuses.js` (mirrored manually for now — see "drift risk" below).
+- **Single excuse pool, two surfaces.** Same 270 excuses power the website and the app. Source of truth lives in both `webb/lib/excuses.js` and `app/src/excuses.js` (mirrored manually for now — see "drift risk" below).
 - **No accounts, no ads, no tracking.** The product position is clean. App Privacy declarations match what the code actually does (Device ID for functionality, Product Interaction for analytics, neither linked to identity).
 - **Offline-first.** Excuse generation, sound, and share card capture all work without internet. Only the leaderboard ticker needs a network call.
 - **Brand consistency.** After the 1.5.0 rename pass, "Excuse Caddie" is the name everywhere except the App Store URL slug (which only updates on the next listing rename in App Store Connect).
@@ -85,7 +85,7 @@ For the day-to-day backlog see [`app/ROADMAP.md`](app/ROADMAP.md) and [`webb/ROA
 
 Pick **one** of the following based on what 60-day analytics show. Do not do all three.
 
-- **A) Localization (Swedish).** If analytics show meaningful Swedish traffic on the webb, port the 416 excuses to a Swedish variant. Native humor, not Google Translate. Submit to App Store as a separate localization on the same binary.
+- **A) Localization (Swedish).** If analytics show meaningful Swedish traffic on the webb, port the 270 excuses to a Swedish variant. Native humor, not Google Translate. Submit to App Store as a separate localization on the same binary.
 - **B) Widget.** If retention is the weak metric, ship an iOS WidgetKit + Android Glance widget showing the "excuse of the day." Two new platform surfaces, but high daily-touch.
 - **C) Per-category browse in the app.** If session-length is the weak metric, port the webb's `/c/[category]` pages into the app (8 category pills below the card). Lets users self-serve a "more like this" loop.
 

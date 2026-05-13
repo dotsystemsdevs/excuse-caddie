@@ -3,7 +3,7 @@
 > A quiet alibi service for the modern golfer. Two surfaces, one excuse pool.
 
 [![Version](https://img.shields.io/badge/app-v1.5.0-1F3528?style=for-the-badge)](app/ROADMAP.md)
-[![Excuses](https://img.shields.io/badge/excuses-416-E8C547?style=for-the-badge&labelColor=1F3528)](app/src/excuses.js)
+[![Excuses](https://img.shields.io/badge/excuses-270-E8C547?style=for-the-badge&labelColor=1F3528)](app/src/excuses.js)
 [![Website](https://img.shields.io/badge/web-excusecaddie.xyz-1F3528?style=for-the-badge)](https://excusecaddie.xyz)
 [![License](https://img.shields.io/badge/license-MIT-1F3528?style=for-the-badge)](LICENSE)
 
@@ -30,7 +30,7 @@
 |---|---|
 | First release on App Store | ✅ v1.3.0 (Feb 2026) |
 | First release on Google Play | ✅ v1.3.0 (Feb 2026) |
-| 400+ excuses in the pool | ✅ 416 |
+| 250+ excuses in the pool | ✅ 270 |
 | Offline-first share cards | ✅ v1.5.0 (May 2026) |
 | Rebrand to **Excuse Caddie: Golf Alibis** | ✅ v1.5.0 |
 | In-app review prompt | ⏳ planned for v1.5.1 |

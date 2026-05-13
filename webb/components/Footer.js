@@ -2,13 +2,37 @@
 
 const GITHUB_URL = 'https://github.com/dotsystemsdevs/excuse-caddie';
 const BMC_URL = 'https://buymeacoffee.com/dotdevs';
+const APP_STORE_URL = 'https://apps.apple.com/us/app/bogey-blamer-golf-excuses/id6759191239';
+const PLAY_STORE_URL = 'https://play.google.com/store/apps/details?id=com.dotsystems.appgolfexcuse';
 
 export default function Footer() {
   return (
     <footer
-      className="relative z-10 w-full flex-shrink-0 px-5 py-3 sm:py-3.5 flex items-center justify-center gap-4 sm:gap-5 text-[11px] sm:text-[12px] text-white/85 font-semibold"
+      className="relative z-10 w-full flex-shrink-0 px-5 py-3 sm:py-3.5 flex flex-wrap items-center justify-center gap-x-4 gap-y-2 sm:gap-x-5 text-[11px] sm:text-[12px] text-white/85 font-semibold"
       style={{ paddingBottom: 'max(0.85rem, env(safe-area-inset-bottom, 0px))' }}
     >
+      <a
+        href={APP_STORE_URL}
+        target="_blank"
+        rel="noopener noreferrer"
+        className="inline-flex items-center gap-1.5 hover:text-white transition-colors"
+        aria-label="Download on the App Store"
+      >
+        <AppleIcon />
+        <span>App Store</span>
+      </a>
+      <span className="opacity-40" aria-hidden>·</span>
+      <a
+        href={PLAY_STORE_URL}
+        target="_blank"
+        rel="noopener noreferrer"
+        className="inline-flex items-center gap-1.5 hover:text-white transition-colors"
+        aria-label="Get it on Google Play"
+      >
+        <PlayIcon />
+        <span>Google Play</span>
+      </a>
+      <span className="opacity-40" aria-hidden>·</span>
       <a
         href={GITHUB_URL}
         target="_blank"
@@ -32,6 +56,22 @@ export default function Footer() {
         <span>Tip the caddie</span>
       </a>
     </footer>
+  );
+}
+
+function AppleIcon() {
+  return (
+    <svg width="13" height="13" viewBox="0 0 24 24" fill="currentColor" aria-hidden>
+      <path d="M17.05 20.28c-.98.95-2.05.86-3.08.4-1.09-.47-2.09-.48-3.24 0-1.44.62-2.2.44-3.06-.4C2.79 15.25 3.51 7.59 9.05 7.31c1.35.07 2.29.74 3.08.8 1.18-.24 2.31-.93 3.57-.84 1.51.12 2.65.72 3.4 1.8-3.12 1.87-2.38 5.98.48 7.13-.57 1.5-1.31 2.99-2.54 4.09zM12.03 7.25c-.15-2.23 1.66-4.07 3.74-4.25.29 2.58-2.34 4.5-3.74 4.25z" />
+    </svg>
+  );
+}
+
+function PlayIcon() {
+  return (
+    <svg width="13" height="13" viewBox="0 0 24 24" fill="currentColor" aria-hidden>
+      <path d="M5 3.5v17l13.5-8.5z" />
+    </svg>
   );
 }
 

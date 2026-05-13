@@ -15,7 +15,7 @@ Loose backlog for the Excuse Caddie native app (`app/`). The website roadmap liv
 - On-device share card capture (`react-native-view-shot`) — replaces the old web-hosted PNG fetch, so sharing now works fully offline
 - Tightened home layout — logo + wordmark anchored near the top, less floating vertical air
 - Single Share button replaces the per-app share pills
-- Two new excuses added (now 416 total)
+- Two new excuses added (now 270 total)
 - App Store + Play Store listings rewritten with ASO-optimized copy
 
 ## Next up (1.5.1)
