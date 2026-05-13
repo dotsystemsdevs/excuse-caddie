@@ -3,6 +3,7 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import TopBanner from '@/components/TopBanner';
 import Footer from '@/components/Footer';
+import StoreBadges from '@/components/StoreBadges';
 import CountUp from '@/components/CountUp';
 import { track } from '@vercel/analytics';
 import { EXCUSES, EXCUSE_COUNT, getDailyExcuse, getExcuseNumber } from '@/lib/excuses';
@@ -265,6 +266,10 @@ export default function HomePage({ initialPickNumber = null } = {}) {
             <span>{copied ? 'Pocketed' : (canNativeShare ? 'Share' : 'Pocket it')}</span>
           </SharePill>
         </div>
+      </div>
+
+      <div className="relative z-10 w-full px-5 pb-2 pt-3 sm:pt-4 flex justify-center">
+        <StoreBadges />
       </div>
 
       <Footer />
