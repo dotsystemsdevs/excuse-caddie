@@ -4,10 +4,21 @@
 
 [![Version](https://img.shields.io/badge/app-v1.5.0-1F3528?style=for-the-badge)](app/ROADMAP.md)
 [![Excuses](https://img.shields.io/badge/excuses-270-E8C547?style=for-the-badge&labelColor=1F3528)](app/src/excuses.js)
+[![Generated](https://img.shields.io/badge/dynamic/json?url=https%3A%2F%2Fexcusecaddie.xyz%2Fapi%2Fgenerated&query=%24.total&label=generated&color=E8C547&labelColor=1F3528&style=for-the-badge&suffix=%20alibis)](https://excusecaddie.xyz)
 [![Website](https://img.shields.io/badge/web-excusecaddie.xyz-1F3528?style=for-the-badge)](https://excusecaddie.xyz)
 [![License](https://img.shields.io/badge/license-MIT-1F3528?style=for-the-badge)](LICENSE)
 
-[**📱 App Store**](https://apps.apple.com/us/app/bogey-blamer-golf-excuses/id6759191239) · [**🤖 Google Play**](https://play.google.com/store/apps/details?id=com.dotsystems.appgolfexcuse) · [**🌐 Website**](https://excusecaddie.xyz)
+<p>
+  <a href="https://apps.apple.com/us/app/bogey-blamer-golf-excuses/id6759191239">
+    <img src="https://developer.apple.com/assets/elements/badges/download-on-the-app-store.svg" alt="Download on the App Store" height="50" />
+  </a>
+  &nbsp;&nbsp;
+  <img src="https://img.shields.io/badge/Coming%20Soon-Google%20Play-1F3528?style=for-the-badge&logo=googleplay&logoColor=E8C547" alt="Coming soon to Google Play" height="50" />
+  &nbsp;&nbsp;
+  <a href="https://www.instagram.com/excusecaddie/">
+    <img src="https://img.shields.io/badge/%40excusecaddie-E1306C?style=for-the-badge&logo=instagram&logoColor=white" alt="Instagram @excusecaddie" height="50" />
+  </a>
+</p>
 
 ---
 
@@ -26,10 +37,13 @@
 
 ## Milestones
 
-| | Status |
+| Milestone | Status |
 |---|---|
-| First release on App Store | ✅ v1.3.0 (Feb 2026) |
-| First release on Google Play | ✅ v1.3.0 (Feb 2026) |
+| 🍎 **[Live on the App Store](https://apps.apple.com/us/app/bogey-blamer-golf-excuses/id6759191239)** | ✅ since v1.3.0 (Feb 2026) |
+| 🤖 **Live on Google Play** | ⏳ submitted, awaiting first approval |
+| 📷 **[Instagram @excusecaddie](https://www.instagram.com/excusecaddie/)** | ✅ live |
+| 🌐 **[Website excusecaddie.xyz](https://excusecaddie.xyz)** | ✅ live |
+| Alibis generated (live counter) | [![Generated](https://img.shields.io/badge/dynamic/json?url=https%3A%2F%2Fexcusecaddie.xyz%2Fapi%2Fgenerated&query=%24.total&label=&color=E8C547&labelColor=1F3528&style=flat-square&suffix=%20served)](https://excusecaddie.xyz) |
 | 250+ excuses in the pool | ✅ 270 |
 | Offline-first share cards | ✅ v1.5.0 (May 2026) |
 | Rebrand to **Excuse Caddie: Golf Alibis** | ✅ v1.5.0 |
