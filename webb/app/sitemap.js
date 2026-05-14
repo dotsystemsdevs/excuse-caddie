@@ -12,6 +12,13 @@ export default function sitemap() {
     priority: 1.0,
   };
 
+  const press = {
+    url: `${SITE_URL}/press`,
+    lastModified,
+    changeFrequency: 'monthly',
+    priority: 0.4,
+  };
+
   const categoryPages = CATEGORY_KEYS.map((key) => ({
     url: `${SITE_URL}/c/${key}`,
     lastModified,
@@ -26,5 +33,5 @@ export default function sitemap() {
     priority: 0.7,
   }));
 
-  return [home, ...categoryPages, ...excusePages];
+  return [home, press, ...categoryPages, ...excusePages];
 }
