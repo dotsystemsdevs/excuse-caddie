@@ -95,11 +95,17 @@ export default async function ExcuseNumberPage({ params }) {
     inLanguage: 'en',
   };
 
+  // Prev / next stay inside [1..EXCUSE_COUNT] — bounce on /N is high
+  // (79% per Vercel Analytics) so giving people one more click reduces
+  // dead-ends without taking attention away from the Mulligan CTA.
+  const prevN = n > 1 ? n - 1 : EXCUSE_COUNT;
+  const nextN = n < EXCUSE_COUNT ? n + 1 : 1;
+
   return (
     <>
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbLd) }} />
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(articleLd) }} />
-      <HomePage initialPickNumber={n} />
+      <HomePage initialPickNumber={n} prevNum={prevN} nextNum={nextN} />
     </>
   );
 }

@@ -47,7 +47,7 @@ function pickRandomLabel(prev) {
   return next;
 }
 
-export default function HomePage({ initialPickNumber = null } = {}) {
+export default function HomePage({ initialPickNumber = null, prevNum = null, nextNum = null } = {}) {
   const pickedFromUrl = useMemo(() => {
     if (initialPickNumber == null) return null;
     const n = Number.parseInt(String(initialPickNumber).trim(), 10);
@@ -240,6 +240,36 @@ export default function HomePage({ initialPickNumber = null } = {}) {
           </SharePill>
         </div>
       </div>
+
+      {/* Prev / next pagination — only shown on /N pages (deep-linked
+          excuses) to give visitors a second click without competing
+          with the Mulligan CTA on the home column. */}
+      {prevNum != null && nextNum != null && (
+        <nav
+          aria-label="Browse excuses"
+          className="relative z-10 w-full px-5 pt-1 pb-1 flex items-center justify-center gap-4 text-[12px] sm:text-[13px] font-semibold"
+        >
+          <a
+            href={`/${prevNum}`}
+            className="text-white/75 hover:text-white transition-colors"
+            aria-label={`Previous excuse, #${prevNum}`}
+          >
+            ← #{prevNum}
+          </a>
+          <span className="opacity-50">·</span>
+          <span className="opacity-70 tabular-nums">
+            #{initialPickNumber} of {EXCUSE_COUNT}
+          </span>
+          <span className="opacity-50">·</span>
+          <a
+            href={`/${nextNum}`}
+            className="text-white/75 hover:text-white transition-colors"
+            aria-label={`Next excuse, #${nextNum}`}
+          >
+            #{nextNum} →
+          </a>
+        </nav>
+      )}
 
       <CategoryRow />
 
