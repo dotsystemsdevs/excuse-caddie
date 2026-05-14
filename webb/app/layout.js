@@ -44,6 +44,13 @@ export const metadata = {
     googleBot: { index: true, follow: true, 'max-image-preview': 'large', 'max-snippet': -1 },
   },
   icons: { icon: '/favicon.png' },
+  // Apple Smart App Banner — Safari on iOS automatically shows a native
+  // "View" banner that opens the app if installed, or the App Store if
+  // not. Zero JS, dismissable. The equivalent for Android Chrome lives
+  // in a runtime-detected component once the Play Store listing is live.
+  other: {
+    'apple-itunes-app': 'app-id=6759191239',
+  },
 };
 
 export const viewport = {
@@ -78,11 +85,49 @@ const STRUCTURED_DATA = {
       isAccessibleForFree: true,
     },
     {
+      '@type': 'MobileApplication',
+      '@id': 'https://excusecaddie.xyz/#ios-app',
+      name: 'Excuse Caddie: Golf Alibis',
+      operatingSystem: 'iOS',
+      applicationCategory: 'EntertainmentApplication',
+      applicationSubCategory: 'Golf',
+      description: LONG_DESCRIPTION,
+      url: 'https://apps.apple.com/us/app/bogey-blamer-golf-excuses/id6759191239',
+      installUrl: 'https://apps.apple.com/us/app/bogey-blamer-golf-excuses/id6759191239',
+      downloadUrl: 'https://apps.apple.com/us/app/bogey-blamer-golf-excuses/id6759191239',
+      softwareVersion: '1.5.0',
+      offers: { '@type': 'Offer', price: '0', priceCurrency: 'USD' },
+      isAccessibleForFree: true,
+      publisher: { '@id': 'https://excusecaddie.xyz/#org' },
+    },
+    {
+      '@type': 'MobileApplication',
+      '@id': 'https://excusecaddie.xyz/#android-app',
+      name: 'Excuse Caddie: Golf Alibis',
+      operatingSystem: 'Android',
+      applicationCategory: 'EntertainmentApplication',
+      applicationSubCategory: 'Golf',
+      description: LONG_DESCRIPTION,
+      url: 'https://play.google.com/store/apps/details?id=com.dotsystems.appgolfexcuse',
+      installUrl: 'https://play.google.com/store/apps/details?id=com.dotsystems.appgolfexcuse',
+      downloadUrl: 'https://play.google.com/store/apps/details?id=com.dotsystems.appgolfexcuse',
+      softwareVersion: '1.5.0',
+      offers: { '@type': 'Offer', price: '0', priceCurrency: 'USD' },
+      isAccessibleForFree: true,
+      publisher: { '@id': 'https://excusecaddie.xyz/#org' },
+    },
+    {
       '@type': 'Organization',
       '@id': 'https://excusecaddie.xyz/#org',
       name: 'Excuse Caddie',
       url: 'https://excusecaddie.xyz/',
       logo: 'https://excusecaddie.xyz/logo.png',
+      sameAs: [
+        'https://www.instagram.com/excusecaddie/',
+        'https://www.tiktok.com/@excusecaddie',
+        'https://github.com/dotsystemsdevs/excuse-caddie',
+        'https://apps.apple.com/us/app/bogey-blamer-golf-excuses/id6759191239',
+      ],
     },
     {
       '@type': 'FAQPage',

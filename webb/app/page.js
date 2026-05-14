@@ -4,6 +4,8 @@ import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import TopBanner from '@/components/TopBanner';
 import Footer from '@/components/Footer';
 import StoreBadges from '@/components/StoreBadges';
+import TipCorner from '@/components/TipCorner';
+import CategoryRow from '@/components/CategoryRow';
 import CountUp from '@/components/CountUp';
 import { track } from '@vercel/analytics';
 import { EXCUSES, EXCUSE_COUNT, getDailyExcuse, getExcuseNumber } from '@/lib/excuses';
@@ -161,6 +163,7 @@ export default function HomePage({ initialPickNumber = null } = {}) {
   return (
     <main className="relative flex h-dvh max-h-dvh overflow-hidden flex-col" id="main">
       <a href="#excuse" className="skip-link">Skip to excuse</a>
+      <TipCorner />
       <TopBanner />
 
       <div className="flex-1 min-h-0 flex flex-col items-center justify-center px-5 py-4 sm:py-6 max-w-2xl mx-auto w-full">
@@ -230,13 +233,15 @@ export default function HomePage({ initialPickNumber = null } = {}) {
           <SharePill
             onClick={handleCopy}
             variant="red"
-            ariaLabel={copied ? 'Pocketed' : (canNativeShare ? 'Share this excuse' : 'Pocket this excuse')}
+            ariaLabel={copied ? 'Shared' : 'Share this excuse'}
           >
-            {copied ? <CheckIcon /> : (canNativeShare ? <ShareIcon /> : <CopyIcon />)}
-            <span>{copied ? 'Pocketed' : (canNativeShare ? 'Share' : 'Pocket it')}</span>
+            {copied ? <CheckIcon /> : <ShareIcon />}
+            <span>{copied ? 'Shared' : 'Share'}</span>
           </SharePill>
         </div>
       </div>
+
+      <CategoryRow />
 
       <div className="relative z-10 w-full px-5 pb-2 pt-3 sm:pt-4 flex justify-center">
         <StoreBadges />

@@ -18,6 +18,10 @@
   <a href="https://www.instagram.com/excusecaddie/">
     <img src="https://img.shields.io/badge/%40excusecaddie-E1306C?style=for-the-badge&logo=instagram&logoColor=white" alt="Instagram @excusecaddie" height="50" />
   </a>
+  &nbsp;&nbsp;
+  <a href="https://www.tiktok.com/@excusecaddie">
+    <img src="https://img.shields.io/badge/%40excusecaddie-000000?style=for-the-badge&logo=tiktok&logoColor=white" alt="TikTok @excusecaddie" height="50" />
+  </a>
 </p>
 
 ---
@@ -42,6 +46,7 @@
 | 🍎 **[Live on the App Store](https://apps.apple.com/us/app/bogey-blamer-golf-excuses/id6759191239)** | ✅ since v1.3.0 (Feb 2026) |
 | 🤖 **Live on Google Play** | ⏳ submitted, awaiting first approval |
 | 📷 **[Instagram @excusecaddie](https://www.instagram.com/excusecaddie/)** | ✅ live |
+| 🎵 **[TikTok @excusecaddie](https://www.tiktok.com/@excusecaddie)** | ✅ live |
 | 🌐 **[Website excusecaddie.xyz](https://excusecaddie.xyz)** | ✅ live |
 | Alibis generated (live counter) | [![Generated](https://img.shields.io/badge/dynamic/json?url=https%3A%2F%2Fexcusecaddie.xyz%2Fapi%2Fgenerated&query=%24.total&label=&color=E8C547&labelColor=1F3528&style=flat-square&suffix=%20served)](https://excusecaddie.xyz) |
 | 250+ excuses in the pool | ✅ 270 |
