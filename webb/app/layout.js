@@ -192,6 +192,7 @@ export default function RootLayout({ children }) {
           type="application/ld+json"
           dangerouslySetInnerHTML={{ __html: JSON.stringify(STRUCTURED_DATA) }}
         />
+        <script defer src="https://tracker-mauve-sigma.vercel.app/t.js" data-project="excuse-caddie" />
       </head>
       <body className="min-h-dvh selection:bg-white/30 selection:text-white">
         {children}
