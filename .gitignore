@@ -42,3 +42,4 @@ Gemini_Generated_Image*.png
 .claude/
 .expo/
 .cursor/
+.vercel

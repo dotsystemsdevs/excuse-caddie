@@ -1,7 +1,9 @@
 import { renderExcuseSquare } from '@/lib/og';
 
+// Next 16 rejects edge + force-static together. Drop force-static and
+// let the route render on edge per-request — same cache behavior via
+// the explicit `revalidate` below.
 export const runtime = 'edge';
-export const dynamic = 'force-static';
 export const revalidate = 86400;
 
 /**
