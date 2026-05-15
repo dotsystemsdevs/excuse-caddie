@@ -12,6 +12,13 @@ export default function sitemap() {
     priority: 1.0,
   };
 
+  const faq = {
+    url: `${SITE_URL}/faq`,
+    lastModified,
+    changeFrequency: 'monthly',
+    priority: 0.9,
+  };
+
   const press = {
     url: `${SITE_URL}/press`,
     lastModified,
@@ -33,5 +40,5 @@ export default function sitemap() {
     priority: 0.7,
   }));
 
-  return [home, press, ...categoryPages, ...excusePages];
+  return [home, faq, press, ...categoryPages, ...excusePages];
 }
