@@ -2,10 +2,20 @@
 
 Loose backlog for the Excuse Caddie native app (`app/`). The website roadmap lives in [`../webb/ROADMAP.md`](../webb/ROADMAP.md). Nothing here is committed — open an issue or PR to push something forward.
 
-**Current version:** `1.5.0` (build 6 / versionCode 7)
+**Current version:** `1.5.2` (build 10 / versionCode 11)
 **Version source of truth:** [`app.json`](app.json) (`expo.version`, `ios.buildNumber`, `android.versionCode`) and [`package.json`](package.json).
 
 ---
+
+## Recently shipped (1.5.2)
+
+Bundled with 1.5.1 changes (1.5.1 was built but never had a code commit, so the diff covers both).
+
+- **Android 16 large-screen support.** Removed top-level `orientation: portrait` lock (iOS still locked to portrait on iPhone via `infoPlist`). `<View>` body wrapped in `<ScrollView>` with `flexGrow: 1` so portrait keeps the CTA pinned to the bottom while landscape and tablet sizes get scroll headroom instead of crushed content. New `$.mainCompact` style trims padding when `useWindowDimensions().height < 500`.
+- **Edge-to-edge fix for Android 15+.** Added `expo-build-properties` plugin with `compileSdkVersion: 36`, `targetSdkVersion: 36`, `buildToolsVersion: "36.0.0"` so the app opts into Android 16 and the edge-to-edge deprecated-API warning in Play Console clears.
+- **Weekly notifications.** Two scheduled per week: Thursday 18:00 (pre-weekend prep) and Sunday 10:00 (peak golf day). Picks a random excuse and rotates titles. Off by default; opt-in via the "Notifications" toggle in the footer. Local only, no server roundtrip.
+- **In-app review prompt.** Uses `expo-store-review` after 5 Mulligan taps. Only asked once per install; the OS rate-limits beyond that.
+- **Cleanup.** Removed unused `expo-web-browser` dep + plugin, removed dead `expo-file-system` import, removed unused `SCREEN_W` constant.
 
 ## Recently shipped (1.5.0)
 
@@ -17,14 +27,6 @@ Loose backlog for the Excuse Caddie native app (`app/`). The website roadmap liv
 - Single Share button replaces the per-app share pills
 - Two new excuses added (now 270 total)
 - App Store + Play Store listings rewritten with ASO-optimized copy
-
-## Next up (1.5.1)
-
-| Item | Why | Notes |
-|------|-----|-------|
-| In-app review prompt | 10x more reviews than organic asks | Use `expo-store-review`. Trigger after ~5 Mulligan taps. Only once per user (the OS rate-limits). |
-| Verify share-card text rendering on Android | The new `react-native-view-shot` capture may render fonts slightly differently across devices | Smoke test on a few real Android phones |
-| Audit unused dependencies | `expo-web-browser` and `expo-application` look unused | Light KB savings, cleaner manifest |
 
 ## Soon
 

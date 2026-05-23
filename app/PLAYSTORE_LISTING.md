@@ -57,18 +57,42 @@ Made with care by Dot Systems. No tracking, no personal data collected. See our 
 
 ## 4. Notifikationer (för Play Store / Data safety)
 
-Appen skickar **inga** notifikationer. Använd denna text där Play Console frågar om notifikationer eller när du fyller i Data safety / App content.
+**Uppdaterad 2026-05-22 för 1.5.2.** Appen skickar nu **lokala** weekly notifications (opt-in). Inga push-notifikationer från server.
 
-**När användare får notifikationer:**  
-Aldrig. Appen skickar inga pushnotifikationer, inga påminnelser och inga in-app-notiser.
+**När användare får notifikationer:**
+Två gånger per vecka om användaren har slagit på det:
+- Torsdag 18:00 (lokal tid): "Heading out tomorrow?" med en slumpvald ursäkt.
+- Söndag 10:00 (lokal tid): "Today's alibi" med en slumpvald ursäkt.
 
-**Vilka som får notifikationer:**  
-Ingen. Ingen användardata används för notifiering.
+**Vilka som får notifikationer:**
+Endast användare som aktivt slår på "Notifications" i appens footer. Av som default.
 
-**Hur och hur ofta:**  
-Ej tillämpligt — appen har ingen notifikationsfunktion. All funktion sker när användaren öppnar appen (generera ursäkt, kopiera, läsa Privacy/Terms). Ingen bakgrundsaktivitet för notiser.
+**Hur:**
+100% lokalt på enheten via `expo-notifications`. Ingen användardata skickas till någon server för notifikationer. Innehållet (ursäkten) väljs slumpmässigt från appens lokala lista vid varje fire.
 
-*(Kopiera ovanstående stycken till Play Console om det efterfrågas, t.ex. under App content → Notifications eller Data safety.)*
+**Behörigheter Play Store / Data safety:**
+- `POST_NOTIFICATIONS` (Android 13+) krävs för att visa notiser.
+- Användaren ombeds första gången de slår på toggle.
+
+*(Kopiera ovanstående till Play Console under App content och Data safety. Under Data safety: notifikationsdata samlas inte in eller delas, då allt sker lokalt.)*
+
+---
+
+## 5. "What's new" / Release notes för 1.5.2
+
+**Gräns:** 500 tecken (båda stores). Kopiera in vid release.
+
+```
+Two big things in 1.5.2:
+
+Weekly alibis. Optional Thursday and Sunday reminders with a fresh excuse. Off by default, toggle in the footer.
+
+Better tablets and landscape. Layout now adapts properly on Android tablets, foldables, and rotated phones. No more crushed buttons.
+
+Plus the usual: in-app rating prompt, smaller install size, edge-to-edge polish for Android 15 and 16.
+```
+
+**Tecken:** ca 380.
 
 ---
 

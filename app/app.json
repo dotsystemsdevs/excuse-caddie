@@ -2,8 +2,8 @@
   "expo": {
     "name": "Excuse Caddie",
     "slug": "app-golfexcuse",
-    "version": "1.5.0",
-    "orientation": "portrait",
+    "version": "1.5.2",
+    "orientation": "default",
     "icon": "./assets/icon.png",
     "userInterfaceStyle": "dark",
     "newArchEnabled": true,
@@ -19,7 +19,18 @@
       "config": {
         "usesNonExemptEncryption": false
       },
-      "buildNumber": "6"
+      "buildNumber": "10",
+      "infoPlist": {
+        "UISupportedInterfaceOrientations": [
+          "UIInterfaceOrientationPortrait"
+        ],
+        "UISupportedInterfaceOrientations~ipad": [
+          "UIInterfaceOrientationPortrait",
+          "UIInterfaceOrientationPortraitUpsideDown",
+          "UIInterfaceOrientationLandscapeLeft",
+          "UIInterfaceOrientationLandscapeRight"
+        ]
+      }
     },
     "android": {
       "adaptiveIcon": {
@@ -28,11 +39,12 @@
       },
       "edgeToEdgeEnabled": true,
       "package": "com.dotsystems.appgolfexcuse",
-      "versionCode": 7,
+      "versionCode": 11,
       "playStoreUrl": "https://play.google.com/store/apps/details?id=com.dotsystems.appgolfexcuse",
       "permissions": [
         "android.permission.INTERNET",
-        "android.permission.VIBRATE"
+        "android.permission.VIBRATE",
+        "android.permission.POST_NOTIFICATIONS"
       ],
       "blockedPermissions": [
         "android.permission.ACTIVITY_RECOGNITION"
@@ -43,9 +55,19 @@
     },
     "plugins": [
       "expo-font",
-      "expo-web-browser",
       "expo-audio",
-      "expo-asset"
+      "expo-asset",
+      "expo-notifications",
+      [
+        "expo-build-properties",
+        {
+          "android": {
+            "compileSdkVersion": 36,
+            "targetSdkVersion": 36,
+            "buildToolsVersion": "36.0.0"
+          }
+        }
+      ]
     ],
     "extra": {
       "eas": {

@@ -1,7 +1,7 @@
 import { useState, useRef, useCallback, useMemo, useEffect, Component } from 'react';
 import {
-  View, Text, Pressable, StyleSheet, Animated, Linking, Platform,
-  AccessibilityInfo, Dimensions, Share, Image,
+  View, Text, Pressable, StyleSheet, Animated, Linking, Platform, Alert,
+  AccessibilityInfo, Share, Image, ScrollView, useWindowDimensions,
 } from 'react-native';
 import Svg, { Path, Defs, Filter, FeTurbulence, Rect, G } from 'react-native-svg';
 import { SafeAreaProvider, SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context';
@@ -10,9 +10,14 @@ import * as Haptics from 'expo-haptics';
 import * as Updates from 'expo-updates';
 import { Accelerometer } from 'expo-sensors';
 import * as Clipboard from 'expo-clipboard';
-import * as FileSystem from 'expo-file-system';
 import * as Sharing from 'expo-sharing';
+import * as StoreReview from 'expo-store-review';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 import { captureRef } from 'react-native-view-shot';
+import {
+  hasPermission, requestPermission, scheduleWeeklySunday, cancelAllScheduled,
+} from './src/notifications';
+import { PREF_KEYS, getBoolPref, setBoolPref } from './src/prefs';
 import {
   useFonts,
   Inter_400Regular,
@@ -31,7 +36,6 @@ import {
 } from './src/api';
 import { playSplash } from './src/sounds';
 
-const { width: SCREEN_W } = Dimensions.get('window');
 const LOGO = require('./assets/logo.png');
 const LEGAL_BASE_URL = 'https://dotsystemsdevs.github.io/app-legal-docs/app-golfexcuse';
 
@@ -90,7 +94,7 @@ export default function App() {
 
   return (
     <ErrorBoundary>
-      <SafeAreaProvider>
+      <SafeAreaProvider style={{ backgroundColor: PALETTE.fairway }}>
         <AppContent />
       </SafeAreaProvider>
     </ErrorBoundary>
@@ -98,6 +102,12 @@ export default function App() {
 }
 
 function AppContent() {
+  const { width: winW, height: winH } = useWindowDimensions();
+  const isCompactHeight = winH < 500;
+  // Tablet = both dimensions roomy. Width-only would falsely match
+  // iPhone landscape (e.g. 844×390 where winW ≥ 768 but height is tiny).
+  // Requiring winH ≥ 500 keeps it true only on actual tablet form factors.
+  const isLargeScreen = winW >= 768 && winH >= 500;
   const dailyExcuse = useMemo(() => getDailyExcuse(EXCUSES), []);
 
   const [excuse, setExcuse] = useState(null);
@@ -110,6 +120,7 @@ function AppContent() {
   const [reduceMotion, setReduceMotion] = useState(false);
   const [updateAvailable, setUpdateAvailable] = useState(false);
   const [updateDownloading, setUpdateDownloading] = useState(false);
+  const [notifEnabled, setNotifEnabled] = useState(false);
 
   const seenExcuses = useRef(new Set());
   const cardOpacity = useRef(new Animated.Value(1)).current;
@@ -129,6 +140,62 @@ function AppContent() {
   useEffect(() => {
     AccessibilityInfo.isReduceMotionEnabled?.().then(setReduceMotion).catch(() => {});
   }, []);
+
+  // Load notification state on mount.
+  useEffect(() => {
+    (async () => {
+      try {
+        const wantsNotif = await getBoolPref(PREF_KEYS.notificationsEnabled);
+        const granted = await hasPermission();
+        setNotifEnabled(wantsNotif && granted);
+      } catch {}
+    })();
+  }, []);
+
+  // In-app review prompt — ask after 5 Mulligan taps, only once per install.
+  const maybeAskForReview = useCallback(async () => {
+    try {
+      const askedAt = await AsyncStorage.getItem('@excuseCaddie/reviewAskedAt');
+      if (askedAt) return;
+      const rawCount = await AsyncStorage.getItem('@excuseCaddie/genCount');
+      const count = (parseInt(rawCount ?? '0', 10) || 0) + 1;
+      await AsyncStorage.setItem('@excuseCaddie/genCount', String(count));
+      if (count < 5) return;
+      const isAvailable = await StoreReview.isAvailableAsync();
+      const hasAction = await StoreReview.hasAction();
+      if (!isAvailable || !hasAction) return;
+      await AsyncStorage.setItem('@excuseCaddie/reviewAskedAt', new Date().toISOString());
+      setTimeout(() => { StoreReview.requestReview().catch(() => {}); }, 600);
+    } catch {}
+  }, []);
+
+  // Toggle weekly Sunday notification. Tap = enable, second tap = disable.
+  const toggleNotif = useCallback(async () => {
+    try {
+      Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light).catch(() => {});
+      if (notifEnabled) {
+        await cancelAllScheduled();
+        await setBoolPref(PREF_KEYS.notificationsEnabled, false);
+        setNotifEnabled(false);
+      } else {
+        const granted = await requestPermission();
+        if (!granted) {
+          // Only popup we keep — when permission is denied, user needs guidance.
+          Alert.alert(
+            'Notifications denied',
+            'Enable notifications for Excuse Caddie in iOS Settings to get your weekly alibi.',
+            [{ text: 'Open Settings', onPress: () => Linking.openSettings() }, { text: 'OK' }],
+          );
+          return;
+        }
+        await scheduleWeeklySunday();
+        await setBoolPref(PREF_KEYS.notificationsEnabled, true);
+        setNotifEnabled(true);
+      }
+    } catch (err) {
+      Alert.alert('Something went wrong', String(err?.message ?? err));
+    }
+  }, [notifEnabled]);
 
   useEffect(() => {
     if (typeof __DEV__ !== 'undefined' && __DEV__) return;
@@ -186,7 +253,8 @@ function AppContent() {
       setGlobalTotal((cur) => (cur == null ? cur : cur + 1));
     }
     trackGenerated().then((t) => { if (typeof t === 'number' && t > 0) setGlobalTotal(t); });
-  }, [cardText, reduceMotion, haptic, cardOpacity, cardTranslate]);
+    maybeAskForReview();
+  }, [cardText, reduceMotion, haptic, cardOpacity, cardTranslate, maybeAskForReview]);
 
   const genRef = useRef(handleGenerate);
   useEffect(() => { genRef.current = handleGenerate; }, [handleGenerate]);
@@ -295,20 +363,34 @@ function AppContent() {
       updateAvailable={updateAvailable}
       updateDownloading={updateDownloading}
       doUpdate={doUpdate}
+      extras={
+        /* Off-screen card used by Share — captured at 1080×1920.
+           Rendered as sibling of the ScrollView so the ScrollView's
+           clipping/layout never affects it, in either orientation. */
+        <StoryShareCard
+          viewRef={storyCardRef}
+          text={cardText}
+          count={globalTotal ?? 0}
+        />
+      }
     >
-      <View style={$.main}>
-        <Image source={LOGO} style={$.logo} resizeMode="contain" accessibilityIgnoresInvertColors />
-        <Text style={$.wordmark}>Excuse Caddie</Text>
+      <View style={[$.main, isCompactHeight && $.mainCompact, isLargeScreen && $.mainLarge]}>
+        {!isCompactHeight && (
+          <>
+            <Image source={LOGO} style={[$.logo, isLargeScreen && $.logoLarge]} resizeMode="contain" accessibilityIgnoresInvertColors />
+            <Text style={[$.wordmark, isLargeScreen && $.wordmarkLarge]}>Excuse Caddie</Text>
+          </>
+        )}
 
-        <View style={$.panelWrap}>
-          <View style={$.panel}>
+        <View style={[$.panelWrap, isCompactHeight && $.panelWrapCompact, isLargeScreen && $.panelWrapLarge]}>
+          <View style={[$.panel, isCompactHeight && $.panelCompact, isLargeScreen && $.panelLarge]}>
             {/* Cream paper grain overlay (matches webb's feTurbulence noise) */}
             <View style={StyleSheet.absoluteFill} pointerEvents="none">
               <PaperGrain />
             </View>
             <Animated.Text
               key={genCount}
-              style={[$.cardText, {
+              style={[$.cardText, isCompactHeight && $.cardTextCompact, isLargeScreen && $.cardTextLarge, {
                 opacity: cardOpacity,
                 transform: [{ translateY: cardTranslate }],
               }]}
@@ -333,14 +415,16 @@ function AppContent() {
           </View>
         </View>
 
-        <View style={$.counterRow}>
-          <CountUp value={globalTotal ?? 0} style={$.counterNum} duration={650} />
-          <Text style={$.counterLabel}>ALIBIS ON THE CARD</Text>
-        </View>
+        {!isCompactHeight && (
+          <View style={[$.counterRow, isLargeScreen && $.counterRowLarge]}>
+            <CountUp value={globalTotal ?? 0} style={[$.counterNum, isLargeScreen && $.counterNumLarge]} duration={650} />
+            <Text style={[$.counterLabel, isLargeScreen && $.counterLabelLarge]}>ALIBIS ON THE CARD</Text>
+          </View>
+        )}
 
-        <CTAButton label={ctaLabel} onPress={handleGenerate} />
+        <CTAButton label={ctaLabel} onPress={handleGenerate} compact={isCompactHeight} large={isLargeScreen} />
 
-        <View style={$.shareRow}>
+        <View style={[$.shareRow, isCompactHeight && $.shareRowCompact]}>
           <SharePill
             bg={PALETTE.red}
             label={copied ? 'Shared' : 'Share'}
@@ -349,7 +433,7 @@ function AppContent() {
           />
         </View>
 
-        <View style={$.footer}>
+        <View style={[$.footer, isCompactHeight && $.footerCompact]}>
           <Pressable
             onPress={() => Linking.openURL(`${LEGAL_BASE_URL}/privacy.html`)}
             hitSlop={10}
@@ -367,14 +451,20 @@ function AppContent() {
           >
             <Text style={$.footerText}>Terms</Text>
           </Pressable>
+          <Text style={$.footerDot}>·</Text>
+          <Pressable
+            onPress={toggleNotif}
+            hitSlop={10}
+            accessibilityRole="switch"
+            accessibilityState={{ checked: notifEnabled }}
+            accessibilityLabel={notifEnabled ? 'Turn off weekly reminder' : 'Turn on weekly reminder'}
+          >
+            <Text style={$.footerText}>
+              {notifEnabled ? '🔔 Notifications on' : '🔕 Notifications'}
+            </Text>
+          </Pressable>
         </View>
 
-        {/* Off-screen card used by Share — captured at 1080×1920. */}
-        <StoryShareCard
-          viewRef={storyCardRef}
-          text={cardText}
-          count={globalTotal ?? 0}
-        />
       </View>
     </AppShell>
   );
@@ -383,7 +473,7 @@ function AppContent() {
 // ── AppShell ───────────────────────────────────────────────────────────
 // Wraps the screen so the dark fairway-deep band of the ticker extends
 // all the way up through the status bar / notch area.
-function AppShell({ children, updateAvailable, updateDownloading, doUpdate }) {
+function AppShell({ children, updateAvailable, updateDownloading, doUpdate, extras }) {
   const insets = useSafeAreaInsets();
   return (
     <View style={$.root}>
@@ -400,9 +490,19 @@ function AppShell({ children, updateAvailable, updateDownloading, doUpdate }) {
         <TopTicker />
       </View>
 
-      <View style={[$.body, { paddingLeft: insets.left, paddingRight: insets.right }]}>
+      <ScrollView
+        style={$.body}
+        contentContainerStyle={[
+          $.bodyContent,
+          { paddingLeft: insets.left, paddingRight: insets.right },
+        ]}
+        keyboardShouldPersistTaps="handled"
+        showsVerticalScrollIndicator={false}
+      >
         {children}
-      </View>
+      </ScrollView>
+
+      {extras}
     </View>
   );
 }
@@ -544,21 +644,24 @@ function TickerItem({ item, rank }) {
 }
 
 // ── CTAButton ──────────────────────────────────────────────────────────
-function CTAButton({ label, onPress }) {
+function CTAButton({ label, onPress, compact, large }) {
   // Two-layer approach to fake CSS inset shadow: outer = darker base,
   // inner = lighter on top, offset 3px → reveals dark "lip" at the bottom.
+  // In compact (landscape) mode we drop `marginTop: 'auto'` from $.ctaOuter
+  // so the CTA stays inline with the content above instead of trying to
+  // fill space that doesn't exist.
   const [pressed, setPressed] = useState(false);
   return (
     <Pressable
       onPress={onPress}
       onPressIn={() => setPressed(true)}
       onPressOut={() => setPressed(false)}
-      style={$.ctaOuter}
+      style={[$.ctaOuter, compact && $.ctaOuterCompact, large && $.ctaOuterLarge]}
       accessibilityRole="button"
       accessibilityLabel={label}
     >
-      <View style={[$.ctaInner, pressed && $.ctaInnerPressed]}>
-        <Text style={$.ctaLabel}>{label.toUpperCase()}</Text>
+      <View style={[$.ctaInner, pressed && $.ctaInnerPressed, large && $.ctaInnerLarge]}>
+        <Text style={[$.ctaLabel, large && $.ctaLabelLarge]}>{label.toUpperCase()}</Text>
       </View>
     </Pressable>
   );
@@ -867,6 +970,21 @@ const $ = StyleSheet.create({
   },
   body: {
     flex: 1,
+    // ScrollView on Android defaults to white. Without this, the
+    // empty area outside the centered 640px main column shows white
+    // in landscape and on tablets. Match the root fairway.
+    backgroundColor: PALETTE.fairway,
+    // Android ScrollView doesn't always clip absolute children (e.g. the
+    // off-screen StoryShareCard at left:-10000). Force clip so it stays
+    // invisible regardless of orientation.
+    overflow: 'hidden',
+  },
+  // ScrollView contentContainer — flexGrow:1 lets `marginTop: 'auto'`
+  // on the CTA keep working in portrait, while landscape/short heights
+  // get scroll headroom instead of crushing content.
+  bodyContent: {
+    flexGrow: 1,
+    backgroundColor: PALETTE.fairway,
   },
 
   updateBanner: {
@@ -901,7 +1019,10 @@ const $ = StyleSheet.create({
   tickerDot: { color: 'rgba(245,241,232,0.2)', fontSize: 14, paddingHorizontal: 4 },
 
   // Main column — anchored near the top so logo + wordmark sit close to
-  // the ticker instead of floating mid-screen.
+  // the ticker instead of floating mid-screen. Lives inside AppShell's
+  // ScrollView (see $.bodyContent: flexGrow:1) so `marginTop:'auto'` on
+  // the CTA still pushes down on tall screens while landscape/short
+  // heights scroll gracefully instead of crushing content.
   main: {
     flex: 1,
     paddingHorizontal: 20,
@@ -912,6 +1033,104 @@ const $ = StyleSheet.create({
     maxWidth: 640,
     alignSelf: 'center',
     width: '100%',
+  },
+  // Compact-height override for landscape phones (winH < 500).
+  // Trims vertical breathing room so logo + panel + CTA + footer
+  // still fit (or scroll gracefully) in ~360px height.
+  mainCompact: {
+    paddingTop: 12,
+    paddingBottom: 12,
+  },
+  logoCompact: {
+    width: 36,
+    height: 36,
+    marginBottom: 4,
+  },
+  wordmarkCompact: {
+    fontSize: 22,
+    lineHeight: 24,
+  },
+  counterRowCompact: {
+    marginTop: 8,
+  },
+  panelWrapCompact: {
+    marginTop: 12,
+  },
+  panelCompact: {
+    paddingHorizontal: 20,
+    paddingVertical: 18,
+    minHeight: 90,
+  },
+  cardTextCompact: {
+    fontSize: 18,
+    lineHeight: 24,
+  },
+  shareRowCompact: {
+    marginTop: 8,
+  },
+  footerCompact: {
+    paddingTop: 8,
+    gap: 12,
+  },
+  ctaOuterCompact: {
+    marginTop: 12,
+  },
+
+  // ── Large-screen overrides (winW >= 768, iPad portrait + tablets) ──
+  // Scales up logo, panel, CTA, text, counter so the app uses tablet
+  // real estate proportionally instead of looking phone-tiny.
+  mainLarge: {
+    paddingTop: 96,
+    paddingHorizontal: 40,
+    paddingBottom: 40,
+    maxWidth: 760,
+  },
+  logoLarge: {
+    width: 96,
+    height: 96,
+    marginBottom: 20,
+  },
+  wordmarkLarge: {
+    fontSize: 56,
+    lineHeight: 56,
+    letterSpacing: -1.8,
+  },
+  counterRowLarge: {
+    marginTop: 28,
+    gap: 12,
+  },
+  counterNumLarge: {
+    fontSize: 26,
+  },
+  counterLabelLarge: {
+    fontSize: 14,
+    letterSpacing: 2.6,
+  },
+  panelWrapLarge: {
+    marginTop: 40,
+  },
+  panelLarge: {
+    paddingHorizontal: 44,
+    paddingVertical: 56,
+    minHeight: 240,
+    borderRadius: 24,
+  },
+  cardTextLarge: {
+    fontSize: 32,
+    lineHeight: 42,
+    letterSpacing: -0.4,
+  },
+  ctaOuterLarge: {
+    borderRadius: 18,
+  },
+  ctaInnerLarge: {
+    paddingVertical: 24,
+    paddingHorizontal: 28,
+    borderRadius: 18,
+  },
+  ctaLabelLarge: {
+    fontSize: 20,
+    letterSpacing: 2.0,
   },
 
   logo: {

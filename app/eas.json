@@ -16,7 +16,15 @@
   "submit": {
     "production": {
       "ios": {
-        "ascAppId": "6759191239"
+        "ascAppId": "6759191239",
+        "ascApiKeyPath": "C:\\Users\\diana\\Desktop\\Agent\\server\\AuthKey_8997P7DW85.p8",
+        "ascApiKeyId": "8997P7DW85",
+        "ascApiKeyIssuerId": "2253bd5e-389f-4315-8406-0f8e4af108dc"
+      },
+      "android": {
+        "serviceAccountKeyPath": "C:\\Users\\diana\\Downloads\\buoyant-lattice-488215-e9-5a2a462c4114.json",
+        "track": "production",
+        "releaseStatus": "completed"
       }
     }
   }
