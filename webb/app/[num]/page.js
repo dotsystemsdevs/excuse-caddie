@@ -15,6 +15,35 @@ function primaryTag(tags) {
   return tags.find((t) => CATEGORY_META[t]) || null;
 }
 
+// Pick `count` sibling excuses for the "More like this" section.
+// Always prefers same-tag picks before falling back to other categories,
+// so a Body-tagged excuse shows other Body excuses (better thematic
+// match for both reader and SEO/internal-linking signal). Deterministic
+// per number via modulo rotation so reloads don't shuffle the list
+// (better cache hits, less visual jitter).
+function pickRelated(currentNum, count = 3) {
+  const current = EXCUSES[currentNum - 1];
+  const tag = primaryTag(current?.tags);
+  const pool = EXCUSES
+    .map((e, i) => ({ num: i + 1, text: e.text, tags: e.tags }))
+    .filter((e) => e.num !== currentNum);
+  const sameTag = tag ? pool.filter((e) => e.tags?.includes(tag)) : [];
+  const rest = pool.filter((e) => !sameTag.includes(e));
+
+  const rotate = (arr, n) => {
+    if (arr.length === 0) return [];
+    const start = (currentNum * 7) % arr.length;
+    return [...arr.slice(start), ...arr.slice(0, start)].slice(0, n);
+  };
+
+  // Take as many same-tag picks as possible, fill any remainder from rest.
+  const picks = sameTag.length >= count
+    ? rotate(sameTag, count)
+    : [...sameTag, ...rotate(rest, count - sameTag.length)];
+
+  return picks.map(({ num, text }) => ({ num, text }));
+}
+
 export function generateStaticParams() {
   return Array.from({ length: EXCUSE_COUNT }, (_, i) => ({ num: String(i + 1) }));
 }
@@ -100,12 +129,13 @@ export default async function ExcuseNumberPage({ params }) {
   // dead-ends without taking attention away from the Mulligan CTA.
   const prevN = n > 1 ? n - 1 : EXCUSE_COUNT;
   const nextN = n < EXCUSE_COUNT ? n + 1 : 1;
+  const related = pickRelated(n);
 
   return (
     <>
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbLd) }} />
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(articleLd) }} />
-      <HomePage initialPickNumber={n} prevNum={prevN} nextNum={nextN} />
+      <HomePage initialPickNumber={n} prevNum={prevN} nextNum={nextN} related={related} />
     </>
   );
 }

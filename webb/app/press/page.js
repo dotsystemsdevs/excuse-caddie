@@ -27,7 +27,7 @@ const LONG_BLURB = `Excuse Caddie is a humor app for golfers who need an instant
 const FACTS = [
   ['Name', 'Excuse Caddie (App Store listing: "Excuse Caddie: Golf Alibis")'],
   ['Category', 'Entertainment / Sports / Humor'],
-  ['Platforms', 'iOS, Android (coming soon), Web'],
+  ['Platforms', 'iOS, Android, Web'],
   ['Excuses', `${EXCUSE_COUNT} hand-curated, across 8 categories`],
   ['Pricing', 'Free. No ads, no in-app purchases, no subscription.'],
   ['Privacy', 'No login. No personal data collected. Anonymous device ID for vote dedupe and usage counts only.'],

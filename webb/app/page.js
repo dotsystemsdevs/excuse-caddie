@@ -6,6 +6,7 @@ import Footer from '@/components/Footer';
 import StoreBadges from '@/components/StoreBadges';
 import TipCorner from '@/components/TipCorner';
 import CategoryRow from '@/components/CategoryRow';
+import RelatedExcuses from '@/components/RelatedExcuses';
 import CountUp from '@/components/CountUp';
 import { track } from '@vercel/analytics';
 import { EXCUSES, EXCUSE_COUNT, getDailyExcuse, getExcuseNumber } from '@/lib/excuses';
@@ -47,7 +48,7 @@ function pickRandomLabel(prev) {
   return next;
 }
 
-export default function HomePage({ initialPickNumber = null, prevNum = null, nextNum = null } = {}) {
+export default function HomePage({ initialPickNumber = null, prevNum = null, nextNum = null, related = null } = {}) {
   const pickedFromUrl = useMemo(() => {
     if (initialPickNumber == null) return null;
     const n = Number.parseInt(String(initialPickNumber).trim(), 10);
@@ -136,7 +137,14 @@ export default function HomePage({ initialPickNumber = null, prevNum = null, nex
   const shareUrl = baseUrl && excuseNumber ? `${baseUrl}/${excuseNumber}` : baseUrl;
   const shareTitle = `"${cardText}" — Excuse Caddie`;
 
-  const canNativeShare = typeof navigator !== 'undefined' && typeof navigator.share === 'function';
+  // Resolve in useEffect so SSR matches first client paint (label stays
+  // "Copy" until we know native share exists, then upgrades on mobile).
+  // Avoids the dishonest "Share" label on desktop where the action is
+  // actually clipboard.writeText.
+  const [canNativeShare, setCanNativeShare] = useState(false);
+  useEffect(() => {
+    setCanNativeShare(typeof navigator !== 'undefined' && typeof navigator.share === 'function');
+  }, []);
 
   const handleCopy = useCallback(async () => {
     const payload = `"${cardText}" — Excuse Caddie ${shareUrl}`;
@@ -228,15 +236,19 @@ export default function HomePage({ initialPickNumber = null, prevNum = null, nex
           {ctaLabel}
         </button>
 
-        {/* Single Share button — system share sheet handles the rest */}
-        <div className="mt-4 sm:mt-5 flex items-center justify-center" aria-label="Share">
+        {/* Share on mobile (native share sheet), Copy on desktop (clipboard). */}
+        <div className="mt-4 sm:mt-5 flex items-center justify-center" aria-label={canNativeShare ? 'Share' : 'Copy'}>
           <SharePill
             onClick={handleCopy}
             variant="red"
-            ariaLabel={copied ? 'Shared' : 'Share this excuse'}
+            ariaLabel={copied ? (canNativeShare ? 'Shared' : 'Copied') : (canNativeShare ? 'Share this excuse' : 'Copy this excuse')}
           >
-            {copied ? <CheckIcon /> : <ShareIcon />}
-            <span>{copied ? 'Shared' : 'Share'}</span>
+            {copied ? <CheckIcon /> : (canNativeShare ? <ShareIcon /> : <CopyIcon />)}
+            <span>
+              {copied
+                ? (canNativeShare ? 'Shared' : 'Copied')
+                : (canNativeShare ? 'Share' : 'Copy')}
+            </span>
           </SharePill>
         </div>
       </div>
@@ -270,6 +282,8 @@ export default function HomePage({ initialPickNumber = null, prevNum = null, nex
           </a>
         </nav>
       )}
+
+      {related && related.length > 0 && <RelatedExcuses excuses={related} />}
 
       <CategoryRow />
 
