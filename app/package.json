@@ -13,7 +13,7 @@
   "dependencies": {
     "@expo-google-fonts/inter": "^0.4.2",
     "@react-native-async-storage/async-storage": "^2.2.0",
-    "expo": "~54.0.33",
+    "expo": "~57.0.7",
     "expo-asset": "~12.0.13",
     "expo-audio": "~1.1.1",
     "expo-build-properties": "~1.0.10",
@@ -51,7 +51,7 @@
   "license": "MIT",
   "devDependencies": {
     "@babel/preset-env": "^7.29.0",
-    "babel-preset-expo": "^54.0.10"
+    "babel-preset-expo": "^57.0.3"
   },
   "overrides": {
     "@babel/plugin-transform-modules-systemjs": "^7.29.4",
